@@ -1,0 +1,65 @@
+# One entry per paper. Newest first within each type.
+#   type:    journal | practitioner | review (under review / accepted proposal) | progress (work in progress)
+#   status:  optional, for type review: under_review | proposal   (text comes from _data/i18n.yml)
+#   pdf:     optional, path to a file you uploaded, e.g. /files/papers/mosner-2026.pdf
+#   doi:     optional, just the DOI, e.g. 10.1002/joom.70018
+#   link:    optional, any other URL (SSRN, publisher page, ...)
+#   details: optional, short extra text, e.g. volume/pages
+
+# ---------- Journal articles ----------
+- type: journal
+  authors: "Mosner, F., Sting, F. & Chandrasekaran, A."
+  year: 2026
+  title: "How Middle Managers Affect Frontline Idea Generation: Evidence from Healthcare Operations"
+  venue: "Journal of Operations Management"
+  details: "72(1), 21–41"
+  doi: "10.1002/joom.70018"
+  pdf: ""
+  link: ""
+
+# ---------- Practitioner articles ----------
+- type: practitioner
+  authors: "Mosner, F., Sting, F. & Chandrasekaran, A."
+  year: 2026
+  title: "How Leaders Unlock Innovation on the Front Lines"
+  venue: "MIT Sloan Management Review"
+  link: "https://sloanreview.mit.edu/article/how-leaders-unlock-innovation-on-the-front-lines/"
+
+# ---------- Under review ----------
+- type: review
+  status: under_review
+  authors: "Mosner, F., Sting, F. & Fuchs, C."
+  title: "How Dominant Individuals Influence Brainstorming Effectiveness"
+  venue: "Organization Science"
+
+- type: review
+  status: under_review
+  authors: "Mosner, F., Sting, F. & Deichmann, D."
+  title: "When Success Slows You Down: Repeat Initiative Taking and Inter-Idea Times in Employee-Driven Ideation"
+  venue: "Research Policy"
+
+- type: review
+  status: under_review
+  authors: "Mosner, F. & Lehmann, M."
+  title: "Measuring Creativity As It Unfolds in Interdependent Teams"
+  venue: "Organization Science"
+  details: "Special Issue “AI-Enabled Frontiers in Organizational Science”"
+
+- type: review
+  status: proposal
+  authors: "Mosner, F."
+  title: "From Resources at Hand to Innovation: An Integrative Review of Bricolage and Its Innovation Outcomes"
+  venue: "Journal of Product Innovation Management"
+
+# ---------- Work in progress ----------
+- type: progress
+  authors: "Mosner, F. & Mensmann, M."
+  title: "Gatekeepers of Attention: When Does Third-Party Endorsement Help New Ventures?"
+
+- type: progress
+  authors: "Mosner, F. & Franke, H."
+  title: "Performance Feedback to Speed up Idea Evaluation"
+
+- type: progress
+  authors: "Mosner, F. & Schweisfurth, T."
+  title: "How Submission Friction Shifts Employee Idea Generation from Quantity to Quality"

@@ -1,0 +1,54 @@
+# One entry per course, grouped by level (master | bachelor).
+# Put slides/handouts into files/teaching/ and list them under materials, e.g.
+#   materials:
+#     - { title: "Syllabus", file: /files/teaching/cim-syllabus.pdf }
+
+# ---------- Master ----------
+- course: "Creativity and Innovation Management"
+  level: master
+  terms: "WS 26/27"
+  description:
+    en: "Lecturer and coordinator of this self-developed course (approx. 35 students)."
+    de: "Dozent und Koordinator dieses selbst entwickelten Kurses (ca. 35 Studierende)."
+  materials: []
+
+- course: "Digital Innovation & Digital Entrepreneurship"
+  level: master
+  terms: "SS 26"
+  description:
+    en: "Lecturer (approx. 70 students)."
+    de: "Dozent (ca. 70 Studierende)."
+  materials: []
+
+- course: "Privacy & Ethics in a Digital World"
+  level: master
+  terms: "SS 26"
+  description:
+    en: "Lecturer (approx. 70 students)."
+    de: "Dozent (ca. 70 Studierende)."
+  materials: []
+
+- course: "Supply Chain Innovation"
+  level: master
+  terms: "WS 19/20 – WS 23/24"
+  description:
+    en: "Process owner and supervision of exercise sessions (50–75 students)."
+    de: "Process Owner und Betreuung der Übungen (50–75 Studierende)."
+  materials: []
+
+# ---------- Bachelor ----------
+- course: "Strategic Business Toolkit – Develop Your Business Idea"
+  level: bachelor
+  terms: "SS 25"
+  description:
+    en: "Workshops in which students develop their own start-up ideas (approx. 80 students)."
+    de: "Workshops, in denen Studierende ihre eigenen Gründungsideen entwickeln (ca. 80 Studierende)."
+  materials: []
+
+- course: "Bachelor Seminar – SCM: Strategy & Innovation"
+  level: bachelor
+  terms: "SS 20, SS 22, WS 22/23, SS 23, WS 23/24, SS 24"
+  description:
+    en: "Lecturer and coordinator; interactive workshop format (approx. 20 students)."
+    de: "Dozent und Koordinator; interaktives Workshop-Format (ca. 20 Studierende)."
+  materials: []

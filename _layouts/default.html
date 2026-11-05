@@ -1,0 +1,47 @@
+<!doctype html>
+{% assign lang = page.lang | default: "en" %}{% assign t = site.data.i18n[lang] %}
+<html lang="{{ lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if page.title %}{{ page.title }} · {% endif %}{{ site.title }}</title>
+  <meta name="description" content="{{ page.description | default: site.description }}">
+  <meta name="author" content="{{ site.title }}">
+  <link rel="stylesheet" href="{{ '/assets/style.css' | relative_url }}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231f4e79'/><text x='50' y='66' font-size='46' text-anchor='middle' fill='white' font-family='Georgia,serif'>{{ site.initials }}</text></svg>">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap wide header-inner">
+      <a class="site-title" href="{{ t.home | relative_url }}">{{ site.title }}</a>
+      <nav class="site-nav">
+        {% for item in t.nav %}
+          {% assign active = false %}
+          {% if page.url == item.url %}{% assign active = true %}{% endif %}
+          {% if item.url != t.home and page.url contains item.url %}{% assign active = true %}{% endif %}
+          <a href="{{ item.url | relative_url }}"{% if active %} class="active" aria-current="page"{% endif %}>{{ item.title }}</a>
+        {% endfor %}
+        <a class="lang" href="{{ page.alt | default: t.switch_home | relative_url }}" hreflang="{% if lang == 'en' %}de{% else %}en{% endif %}">{{ t.switch_label }}</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="{% if page.layout == 'home' %}home{% else %}wrap narrow{% endif %}">
+    {{ content }}
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap wide footer-inner">
+      <span>© {{ site.time | date: "%Y" }} {{ site.title }}</span>
+      <span class="footer-links">
+        <a href="mailto:{{ site.email }}">E-Mail</a>
+        {% if site.links.orcid != "" %}<a href="{{ site.links.orcid }}">ORCID</a>{% endif %}
+        {% if site.links.scholar != "" %}<a href="{{ site.links.scholar }}">Google Scholar</a>{% endif %}
+        {% if site.links.linkedin != "" %}<a href="{{ site.links.linkedin }}">LinkedIn</a>{% endif %}
+        {% if site.links.university != "" %}<a href="{{ site.links.university }}">{% if lang == "de" %}Uni Köln{% else %}Uni Cologne{% endif %}</a>{% endif %}
+        <a href="{{ '/impressum/' | relative_url }}">Impressum</a>
+      </span>
+    </div>
+  </footer>
+</body>
+</html>

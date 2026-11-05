@@ -1,0 +1,53 @@
+en:
+  home: /
+  nav:
+    - { title: Home, url: / }
+    - { title: Publications, url: /publications/ }
+    - { title: Blog, url: /blog/ }
+    - { title: Teaching, url: /teaching/ }
+    - { title: CV, url: /cv/ }
+  switch_label: Deutsch
+  switch_home: /de/
+  latest_posts: Latest posts
+  all_posts: All posts
+  no_posts: No posts yet.
+  journal: Journal articles
+  practitioner: Practitioner articles
+  review: Under review
+  progress: Work in progress
+  under_review: Under review at
+  proposal: Proposal accepted at
+  thesis_note: "Supervision of more than 25 master's theses and more than 50 bachelor's theses."
+  materials: Materials
+  terms: Terms
+  read_more: Read more
+  back: All posts
+  contact: Contact
+  forthcoming: forthcoming
+
+de:
+  home: /de/
+  nav:
+    - { title: Start, url: /de/ }
+    - { title: Publikationen, url: /de/publications/ }
+    - { title: Blog, url: /de/blog/ }
+    - { title: Lehre, url: /de/teaching/ }
+    - { title: Lebenslauf, url: /de/cv/ }
+  switch_label: English
+  switch_home: /
+  latest_posts: Neueste Beiträge
+  all_posts: Alle Beiträge
+  no_posts: Noch keine Beiträge.
+  journal: Zeitschriftenartikel
+  practitioner: Praxisbeiträge
+  review: Im Begutachtungsverfahren
+  progress: Laufende Projekte
+  under_review: Under Review bei
+  proposal: Proposal angenommen bei
+  thesis_note: "Betreuung von mehr als 25 Masterarbeiten und mehr als 50 Bachelorarbeiten."
+  materials: Materialien
+  terms: Semester
+  read_more: Weiterlesen
+  back: Alle Beiträge
+  contact: Kontakt
+  forthcoming: im Erscheinen

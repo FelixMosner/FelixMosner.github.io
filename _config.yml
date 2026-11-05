@@ -1,0 +1,41 @@
+# ------------------------------------------------------------------
+#  Site settings — edit these first.
+#  Einstellungen — diese zuerst anpassen.
+# ------------------------------------------------------------------
+title: Felix Mosner
+description: "Postdoc in Innovation Management & Entrepreneurship, University of Cologne"
+
+# Your GitHub Pages address. Replace USERNAME with your GitHub user name.
+url: "https://felixmosner.github.io"
+baseurl: ""
+
+# Profile photo: put a square image at assets/img/profile.jpg and set to true.
+photo: true
+initials: FM
+
+email: mosner@wiso.uni-koeln.de
+
+# Profile links — leave empty ("") to hide.
+links:
+  orcid: ""            # e.g. https://orcid.org/0000-0000-0000-0000
+  scholar: ""          # e.g. https://scholar.google.com/citations?user=XXXX
+  linkedin: ""         # e.g. https://www.linkedin.com/in/yourname
+  university: "https://cd.wiso.uni-koeln.de/en/team/innovationsmanagement-und-entrepreneuship/felix-mosner"
+
+# ------------------------------------------------------------------
+#  Technical settings — no need to change.
+# ------------------------------------------------------------------
+markdown: kramdown
+# English posts → /blog/2026/title/ ; German posts (in de/_posts) → /de/blog/2026/title/
+permalink: /:categories/blog/:year/:title/
+
+defaults:
+  - scope: { path: "" }
+    values: { layout: page, lang: en }
+  - scope: { path: "", type: posts }
+    values: { layout: post, lang: en }
+  - scope: { path: "de" }
+    values: { lang: de }
+
+exclude:
+  - README.md

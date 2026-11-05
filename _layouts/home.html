@@ -1,0 +1,92 @@
+---
+layout: default
+---
+{% assign lang = page.lang | default: "en" %}{% assign t = site.data.i18n[lang] %}
+<!-- HERO -->
+<section class="wrap wide">
+  <div class="hero-grid">
+    <div>
+      <p class="eyebrow">{{ page.hero.eyebrow }}</p>
+      <h1>{{ page.hero.headline }}</h1>
+      <p class="sub">{{ page.hero.sub }}</p>
+      <p class="intro">{{ page.hero.intro }}</p>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="#contact">{{ page.hero.button_contact }}</a>
+        <a class="btn btn-ghost" href="{{ page.hero.button_more_url | relative_url }}">{{ page.hero.button_more }}</a>
+      </div>
+    </div>
+    <div class="portrait-wrap">
+      {% if site.photo %}
+      <img class="portrait" src="{{ '/assets/img/profile.jpg' | relative_url }}" alt="{{ site.title }}" onerror="this.style.display='none';this.nextElementSibling.style.display='grid';">
+      <div class="portrait portrait-fallback" aria-hidden="true" style="display:none">{{ site.initials }}</div>
+      {% else %}
+      <div class="portrait portrait-fallback" aria-hidden="true">{{ site.initials }}</div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED: PUBLICATIONS & MEDIA -->
+<section class="band">
+  <div class="wrap wide">
+    <p class="eyebrow">{{ page.featured.eyebrow }}</p>
+    <h2>{{ page.featured.title }}</h2>
+    <p class="lead">{{ page.featured.lead }}</p>
+    <ul class="feature-list">
+      {% for f in page.featured.items %}
+      <li>
+        <span class="kind">{{ f.kind }}</span>
+        <span><a class="title" href="{{ f.url | relative_url }}">{{ f.title }}</a><span class="meta">{{ f.meta }}</span></span>
+      </li>
+      {% endfor %}
+    </ul>
+    <a class="btn btn-ghost" href="{{ page.featured.button_url | relative_url }}">{{ page.featured.button }}</a>
+  </div>
+</section>
+
+<!-- RESEARCH TOPICS -->
+<section class="band band-tint">
+  <div class="wrap wide">
+    <p class="eyebrow">{{ page.research.eyebrow }}</p>
+    <h2>{{ page.research.title }}</h2>
+    <p class="lead">{{ page.research.lead }}</p>
+    <div class="cards">
+      {% for c in page.research.cards %}
+      <div class="card">
+        <h3>{{ c.title }}</h3>
+        <p>{{ c.question }}</p>
+      </div>
+      {% endfor %}
+    </div>
+    <a class="btn btn-ghost" href="{{ page.research.button_url | relative_url }}">{{ page.research.button }}</a>
+  </div>
+</section>
+
+<!-- BLOG -->
+<section class="band">
+  <div class="wrap wide">
+    <p class="eyebrow">Blog</p>
+    <h2>{{ t.latest_posts }}</h2>
+    {% include post-list.html limit=3 %}
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="band band-tint" id="contact">
+  <div class="wrap wide contact-grid">
+    <div>
+      <p class="eyebrow">{{ page.contact.eyebrow }}</p>
+      <h2>{{ page.contact.title }}</h2>
+      <p>{{ page.contact.text }}</p>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="mailto:{{ site.email }}?subject={{ page.contact.subject | uri_escape }}">{{ page.contact.button }}</a>
+        {% if site.links.linkedin != "" %}<a class="btn btn-ghost" href="{{ site.links.linkedin }}">LinkedIn</a>{% endif %}
+      </div>
+    </div>
+    <div class="contact-box">
+      <p><span class="label">E-Mail</span><a href="mailto:{{ site.email }}">{{ site.email }}</a></p>
+      <p><span class="label">{{ page.contact.office_label }}</span>{{ page.contact.office }}</p>
+      {% if site.links.university != "" %}<p><span class="label">{{ page.contact.profile_label }}</span><a href="{{ site.links.university }}">{{ page.contact.profile_text }}</a></p>{% endif %}
+    </div>
+  </div>
+</section>

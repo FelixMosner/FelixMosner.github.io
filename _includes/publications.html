@@ -1,0 +1,23 @@
+{% assign lang = page.lang | default: "en" %}{% assign t = site.data.i18n[lang] %}
+{% assign groups = "journal,practitioner,review,progress" | split: "," %}
+{% for g in groups %}
+  {% assign items = site.data.publications | where: "type", g %}
+  {% if items.size > 0 %}
+  <h2>{{ t[g] }}</h2>
+  <ol class="pubs">
+    {% for p in items %}
+    <li>
+      {% assign a_end = p.authors | slice: -1 %}{% assign t_end = p.title | slice: -1 %}
+      <span class="pub-authors">{{ p.authors | replace: "Mosner, F.", "<strong>Mosner, F.</strong>" }}</span>{% if p.forthcoming %} ({{ t.forthcoming }}).{% elsif p.year %} ({{ p.year }}).{% elsif a_end != "." %}.{% endif %}
+      <span class="pub-title">{{ p.title }}{% if t_end != "?" and t_end != "." %}.{% endif %}</span>
+      {% if p.status %}{{ t[p.status] }} {% endif %}{% if p.venue %}<em>{{ p.venue }}</em>{% if p.details %}, {{ p.details }}{% endif %}.{% elsif p.details %}{{ p.details }}.{% endif %}
+      <span class="pub-links">
+        {% if p.pdf and p.pdf != "" %}<a href="{{ p.pdf | relative_url }}">PDF</a>{% endif %}
+        {% if p.doi and p.doi != "" %}<a href="https://doi.org/{{ p.doi }}">DOI</a>{% endif %}
+        {% if p.link and p.link != "" %}<a href="{{ p.link }}">Link</a>{% endif %}
+      </span>
+    </li>
+    {% endfor %}
+  </ol>
+  {% endif %}
+{% endfor %}

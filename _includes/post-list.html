@@ -1,0 +1,16 @@
+{% assign lang = page.lang | default: "en" %}{% assign t = site.data.i18n[lang] %}
+{% assign posts = site.posts | where: "lang", lang %}
+{% if include.limit %}{% assign posts = posts | slice: 0, include.limit %}{% endif %}
+{% if posts.size == 0 %}
+<p class="muted">{{ t.no_posts }}</p>
+{% else %}
+<ul class="post-list">
+  {% for post in posts %}
+  <li>
+    <time datetime="{{ post.date | date: '%Y-%m-%d' }}">{{ post.date | date: "%d.%m.%Y" }}</time>
+    <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+    {% if post.summary and include.summaries %}<p>{{ post.summary }}</p>{% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}

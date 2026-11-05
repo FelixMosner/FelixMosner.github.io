@@ -1,0 +1,12 @@
+---
+layout: default
+---
+{% assign lang = page.lang | default: "en" %}{% assign t = site.data.i18n[lang] %}
+<article class="post">
+  <p class="post-meta"><time datetime="{{ page.date | date: '%Y-%m-%d' }}">{{ page.date | date: "%d.%m.%Y" }}</time></p>
+  <h1 class="page-title">{{ page.title }}</h1>
+  <div class="content">
+  {{ content }}
+  </div>
+  <p class="back"><a href="{% if lang == 'de' %}{{ '/de/blog/' | relative_url }}{% else %}{{ '/blog/' | relative_url }}{% endif %}">← {{ t.back }}</a></p>
+</article>

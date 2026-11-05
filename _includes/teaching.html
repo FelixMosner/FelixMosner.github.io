@@ -1,0 +1,23 @@
+{% assign lang = page.lang | default: "en" %}{% assign t = site.data.i18n[lang] %}
+{% assign levels = "master,bachelor" | split: "," %}
+{% for lv in levels %}
+  {% assign courses = site.data.teaching | where: "level", lv %}
+  {% if courses.size > 0 %}
+  <h2 class="level">{% if lv == "master" %}{% if lang == "de" %}Masterstudium{% else %}Graduate (Master){% endif %}{% else %}{% if lang == "de" %}Bachelorstudium{% else %}Undergraduate (Bachelor){% endif %}{% endif %}</h2>
+  <div class="courses">
+    {% for c in courses %}
+    <section class="course">
+      <h3>{{ c.course }}</h3>
+      <p class="muted">{{ t.terms }}: {{ c.terms }}</p>
+      {% if c.description %}<p>{{ c.description[lang] }}</p>{% endif %}
+      {% if c.materials and c.materials.size > 0 %}
+      <p class="materials"><strong>{{ t.materials }}:</strong>
+        {% for m in c.materials %}<a href="{{ m.file | relative_url }}">{{ m.title }}</a>{% unless forloop.last %} · {% endunless %}{% endfor %}
+      </p>
+      {% endif %}
+    </section>
+    {% endfor %}
+  </div>
+  {% endif %}
+{% endfor %}
+<p class="thesis-note">{{ t.thesis_note }}</p>
