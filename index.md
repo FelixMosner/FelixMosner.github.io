@@ -4,9 +4,9 @@ layout: home
 alt: /de/
 hero:
   eyebrow: "Innovation Management · University of Cologne"
-  headline: "Award-winning researcher on how new ideas emerge in organizations"
-  sub: "I study how employees come up with ideas – and what leaders can do to help those ideas thrive."
-  intro: "I am a postdoctoral researcher in Innovation Management & Entrepreneurship at the University of Cologne. My research combines field data from real organizations, experiments and case studies, and has been published in the Journal of Operations Management and MIT Sloan Management Review."
+  headline: "How leaders, teams and processes shape which ideas emerge – and which ones succeed."
+  sub: "From frontline employees in hospitals to brainstorming teams and new ventures – my work looks at the people and processes behind creativity and innovation"
+  intro: "I am a postdoctoral researcher in Innovation Management & Entrepreneurship at the University of Cologne. My research combines field data from real organizations, experiments and case studies, and has so far been published in the Journal of Operations Management and MIT Sloan Management Review."
   button_contact: "Get in touch"
   button_more: "Curriculum vitae"
   button_more_url: /cv/
