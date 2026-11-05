@@ -4,7 +4,7 @@ layout: home
 alt: /
 hero:
   eyebrow: "Innovationsmanagement · Universität zu Köln"
-   headline: "Wie Führungskräfte, Teams und Prozesse prägen, welche Ideen entstehen – und welche sich durchsetzen."
+  headline: "Wie Führungskräfte, Teams und Prozesse prägen, welche Ideen entstehen – und welche sich durchsetzen."
   sub: "Von Mitarbeitenden im Krankenhaus über Brainstorming-Teams bis zu neuen Ventures – meine Forschung beleuchtet die Menschen und Prozesse hinter Kreativität und Innovation."
   intro: "Ich bin PostDoc für Innovationsmanagement & Entrepreneurship an der Universität zu Köln. Meine Forschung verbindet Felddaten aus echten Organisationen, Experimente und Fallstudien und ist im Journal of Operations Management und in der MIT Sloan Management Review erschienen."
   button_contact: "In Kontakt treten"
@@ -38,8 +38,8 @@ featured:
 research:
   eyebrow: "Forschung"
   title: "Woran ich arbeite"
- lead: "Meine Forschung beschäftigt sich damit, wie gute Ideen aus den Köpfen in die Praxis gelangen, wie sich die Bewertung von Ideen beschleunigen lässt und wie Teamdynamiken kreative Ergebnisse prägen."  
- button: "Publikationen & Projekte"
+  lead: "Meine Forschung beschäftigt sich damit, wie gute Ideen aus den Köpfen in die Praxis gelangen, wie sich die Bewertung von Ideen beschleunigen lässt und wie Teamdynamiken kreative Ergebnisse prägen."
+  button: "Publikationen & Projekte"
   button_url: /de/publications/
   cards:
     - title: "Innovation an der Basis"
