@@ -38,7 +38,7 @@ featured:
 research:
   eyebrow: "Research"
   title: "What I work on"
-  lead: "My research revolves around one question: how do good ideas get from people's heads into practice?"
+  lead: "My research revolves around how good ideas get from people's heads into practice, how to speed up idea evaluation and how team dynamics shape creative outcomes"
   button: "Publications & projects"
   button_url: /publications/
   cards:
