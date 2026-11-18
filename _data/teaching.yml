@@ -5,6 +5,7 @@
 
 # ---------- Master ----------
 - course: "Creativity and Innovation Management"
+  materials_page: { en: /teaching/creativity-innovation/, de: /de/teaching/creativity-innovation/ }
   level: master
   terms: "WS 26/27"
   description:
