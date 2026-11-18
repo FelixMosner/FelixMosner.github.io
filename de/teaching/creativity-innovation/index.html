@@ -1,0 +1,33 @@
+---
+title: "Creativity and Innovation Management – Materialien"
+alt: /teaching/creativity-innovation/
+# Spiel hinzufügen: einen Block ab "- name:" kopieren und die Texte ändern.
+# "file" ist der Dateiname des Spiels im Ordner teaching/creativity-innovation/games/
+sections:
+  - title: "Ideengenerierung"
+    games:
+      - name: "Brainstorming Challenge"
+        file: brainstorming-challenge.html
+        description: "In fünf Minuten möglichst viele Ideen entwickeln und dann Menge und Qualität vergleichen."
+        duration: "10 Min."
+  - title: "Ideenbewertung"
+    games:
+      - name: "Idea Evaluation Simulation"
+        file: idea-evaluation.html
+        description: "Als Innovationsmanager:in entscheiden, welche Ideen finanziert werden."
+        duration: "15 Min."
+---
+<p><a href="{{ '/de/teaching/' | relative_url }}">← Zurück zur Lehre</a></p>
+<p>Interaktive Spiele aus diesem Kurs. Sie laufen direkt im Browser, ohne Anmeldung oder Installation.</p>
+{% for s in page.sections %}
+<h2>{{ s.title }}</h2>
+<div class="game-grid">
+  {% for g in s.games %}
+  <a class="game-card" href="{{ '/teaching/creativity-innovation/games/' | append: g.file | relative_url }}" target="_blank" rel="noopener">
+    <h3>{{ g.name }}</h3>
+    <p>{{ g.description }}</p>
+    <span class="game-meta">{{ g.duration }} · Spielen →</span>
+  </a>
+  {% endfor %}
+</div>
+{% endfor %}
