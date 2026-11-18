@@ -7,7 +7,7 @@
   <div class="courses">
     {% for c in courses %}
     <section class="course">
-      <h3>{{ c.course }}</h3>
+      <h3>{{ c.course }}{% if c.materials_page %} <a class="materials-btn" href="{{ c.materials_page[lang] | relative_url }}">{{ t.materials }}</a>{% endif %}</h3>
       <p class="muted">{{ t.terms }}: {{ c.terms }}</p>
       {% if c.description %}<p>{{ c.description[lang] }}</p>{% endif %}
       {% if c.materials and c.materials.size > 0 %}
