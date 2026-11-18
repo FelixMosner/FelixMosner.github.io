@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="only light">
+<title>Fix the bike-sharing problem</title>
+<style>
+:root{color-scheme:only light}
+*{box-sizing:border-box}
+html,body{margin:0;background:#F4F5FA;color:#141829}
+body{font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:60rem;margin:0 auto;padding:1.2rem 1.2rem 4rem}
+h1,h2,h3{letter-spacing:-.02em;line-height:1.15;margin:0 0 .6rem;color:#141829}
+h1{font-size:clamp(1.7rem,4.4vw,2.3rem);font-weight:800}
+h2{font-size:1.25rem}h3{font-size:1.02rem}
+p{margin:0 0 .9rem}
+.muted{color:#5A6178}.small{font-size:.88rem}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;gap:1rem}
+.brand{display:flex;gap:.6rem;align-items:center;font-weight:700}
+.logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#4C3BFF,#8A4DFF);display:grid;place-items:center;color:#fff;font-size:1rem}
+.rounds{display:flex;gap:.35rem;margin:0 0 1rem}
+.rounds span{flex:1;font-size:.75rem;font-weight:700;color:#5A6178}
+.rounds span::before{content:"";display:block;height:6px;border-radius:3px;background:#E0E3EE;margin-bottom:.3rem}
+.rounds span.done::before{background:#0FA678}.rounds span.now{color:#141829}.rounds span.now::before{background:linear-gradient(90deg,#4C3BFF,#FF9F1C)}
+.banner{background:#FFF1DC;border-radius:12px;padding:.6rem .9rem;font-size:.85rem;margin-bottom:1rem}
+.card{background:#fff;border:1px solid #E0E3EE;border-radius:18px;padding:1.2rem;box-shadow:0 1px 2px rgba(20,24,41,.05),0 8px 24px -10px rgba(20,24,41,.12);margin:1rem 0}
+.hero{position:relative;overflow:hidden;border:none;color:#fff;background:radial-gradient(120% 140% at 100% 0%,#8A4DFF 0%,transparent 55%),linear-gradient(135deg,#3A2BE0,#5B3BFF 60%,#7E4BFF);padding:1.7rem 1.5rem}
+.hero h1{color:#fff}.hero p{color:#E9E6FF}
+.pill{display:inline-block;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:.2rem .7rem;font-size:.8rem;margin-bottom:.7rem}
+button{font:inherit;font-weight:650;cursor:pointer;border-radius:999px;padding:.7rem 1.25rem;border:none;background:linear-gradient(135deg,#4C3BFF,#8A4DFF);color:#fff;box-shadow:0 6px 18px -6px rgba(76,59,255,.55)}
+button:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+button.ghost{background:#fff;color:#141829;border:1px solid #D5D9E6;box-shadow:none}
+button:focus-visible{outline:3px solid #FF9F1C;outline-offset:3px}
+.actions{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-top:1rem}
+.opt{display:flex;gap:.7rem;align-items:flex-start;padding:.8rem 1rem;border:1.5px solid #E0E3EE;border-radius:14px;margin:.5rem 0;background:#fff;cursor:pointer}
+.opt.on{border-color:#4C3BFF;background:#ECEAFF}
+.opt input{accent-color:#4C3BFF;margin-top:.3rem}
+.opt.locked{opacity:.45;cursor:not-allowed}
+.tag{display:inline-block;font-size:.72rem;font-weight:800;border-radius:6px;padding:.05rem .4rem;margin-left:.4rem;vertical-align:middle}
+.tag.ai{background:#141829;color:#fff}.tag.ev{background:#DDF5EC;color:#0B4F3A}
+.dash{position:sticky;top:0;z-index:5;background:#F4F5FA;padding:.6rem 0 .8rem;display:grid;grid-template-columns:1fr 1fr auto;gap:1rem;align-items:center}
+.meter{background:#fff;border:1px solid #E0E3EE;border-radius:14px;padding:.6rem .9rem}
+.meter b{font-size:1.25rem;letter-spacing:-.02em}
+.meter span{display:block;font-size:.78rem;color:#5A6178;font-weight:600}
+.bar{height:8px;background:#EEF0F8;border-radius:4px;overflow:hidden;margin-top:.35rem}
+.bar i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#FF9F1C,#4C3BFF);transition:width .4s}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(17rem,1fr));gap:.8rem}
+.sh{background:#fff;border:1px solid #E0E3EE;border-radius:16px;padding:1rem}
+.sh .who{display:flex;gap:.6rem;align-items:center;margin-bottom:.6rem}
+.sh .av{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:1.25rem;background:#ECEAFF;flex:none}
+.sh .who b{display:block}.sh .who small{color:#5A6178}
+.q{display:flex;justify-content:space-between;gap:.5rem;align-items:center;width:100%;text-align:left;background:#F4F5FA;color:#141829;border:1.5px solid #E0E3EE;box-shadow:none;border-radius:12px;padding:.55rem .75rem;margin:.35rem 0;font-weight:600;font-size:.9rem}
+.q:hover:not(:disabled){border-color:#4C3BFF}
+.q .cost{white-space:nowrap;font-size:.78rem;color:#5A6178;font-weight:700}
+.q.done{background:#DDF5EC;border-color:#0FA678;color:#0B4F3A}.q.done .cost{color:#0B4F3A}.q.done:disabled{opacity:1}
+.q.aiq{background:#EEF0F8}
+.notes{list-style:none;padding:0;margin:0;display:grid;gap:.55rem}
+.notes li{background:#fff;border:1px solid #E0E3EE;border-left:4px solid #4C3BFF;border-radius:12px;padding:.65rem .9rem}
+.notes li.ai{border-left-color:#141829;background:#FAFAFD}
+.notes small{display:block;color:#5A6178;font-weight:600;margin-bottom:.15rem}
+.notes li.new{animation:pop .3s}
+@keyframes pop{from{transform:scale(.97);opacity:0}to{transform:scale(1);opacity:1}}
+.score{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:1rem 0}
+.score div{background:#fff;border:1px solid #E0E3EE;border-radius:16px;padding:1rem;text-align:center}
+.score b{display:block;font-size:2.1rem;letter-spacing:-.03em;line-height:1.1}
+.score span{font-size:.85rem;color:#5A6178}
+.facts{list-style:none;padding:0;margin:.4rem 0;display:grid;gap:.4rem}
+.facts li{padding:.45rem .7rem;border-radius:10px;font-size:.92rem}
+.facts li.got{background:#DDF5EC;color:#0B4F3A}.facts li.miss{background:#F4F5FA;color:#5A6178}
+.msg{border-radius:14px;padding:.9rem 1rem;font-weight:600;margin:.6rem 0}
+.msg.good{background:#DDF5EC;color:#0B4F3A}.msg.warn{background:#FFF1DC;color:#5C3B00}.msg.bad{background:#FDE8E4;color:#7A2414}
+.lesson{background:#ECEAFF;border-radius:14px;padding:.9rem 1rem;margin:.6rem 0}
+.lesson b{color:#3A2BE0}
+/* ladder (round 2) */
+.ladder{display:grid;gap:.55rem;margin:.6rem 0}
+.rung{display:grid;grid-template-columns:2.4rem 1fr;gap:.6rem;align-items:center}
+.rung .lv{width:2.4rem;height:2.4rem;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.85rem;background:#E0E3EE;color:#5A6178}
+.rung .fr{background:#fff;border:1.5px solid #E0E3EE;border-radius:14px;padding:.65rem .9rem;font-weight:600}
+.rung.hidden .fr{color:#9AA1BC;border-style:dashed;font-weight:500}
+.rung.cur .lv{background:#4C3BFF;color:#fff}.rung.cur .fr{border-color:#4C3BFF;background:#ECEAFF}
+.rung.side .lv{background:#FFF1DC;color:#7A4A00}
+svg text{font-family:inherit}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+td,th{border-bottom:1px solid #E0E3EE;padding:.45rem .6rem;text-align:left;vertical-align:top}
+th{background:#F4F5FA;font-size:.8rem;color:#4A5068}
+input[type=range]{width:100%;accent-color:#4C3BFF}
+@media(max-width:40rem){.dash{grid-template-columns:1fr 1fr}.dash>button{grid-column:1/-1}.score{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main id="app" aria-live="polite"></main>
+<script>
+"use strict";
+/* ============================================================================
+   THE WRONG PROBLEM: THREE CASES (SCORM 2004)
+   Round 1  How much is enough?   outcome = frame quality x season impact left
+   Round 2  At which level?       outcome = impact potential x actionability
+   Round 3  What can AI tell you? outcome = frame quality x evidence; plus calibration
+   ============================================================================ */
+const R1 = { seasonWeeks: 12, decay: 0.045, minImpact: 0.15, cost: [0.5, 1, 2] };
+const R2 = { invCost: 0.03, best: 0.68 };
+const R3 = { budget: 10, noEvidence: 0.5 };
+
+/* ---------------------------------------------------------------- round 1 content (bike sharing) */
+const R1_FACTS = {
+  avail:  {en:"Stations at the main station and uphill are empty every morning between 7 and 9.", de:"Die Stationen am Hauptbahnhof und am Hang sind jeden Morgen zwischen 7 und 9 Uhr leer."},
+  pile:   {en:"Bikes pile up at the riverside stations; nobody moves them back uphill.", de:"Die Räder sammeln sich an den Stationen am Fluss; niemand bringt sie zurück bergauf."},
+  broken: {en:"About one in four bikes is broken, and users rarely report damage.", de:"Etwa jedes vierte Rad ist defekt, und Schäden werden kaum gemeldet."},
+  signup: {en:"Registration in the app is so cumbersome that many give up.", de:"Die Registrierung in der App ist so umständlich, dass viele aufgeben."},
+  price:  {en:"A 20 % price cut last year barely changed the number of rides.", de:"Eine Preissenkung um 20 % im letzten Jahr hat die Zahl der Fahrten kaum verändert."},
+  kpi:    {en:"Funding depends on rides per bike: more bikes alone would make that number worse.", de:"Die Förderung hängt an Fahrten pro Rad: Mehr Räder allein würden diese Zahl verschlechtern."}
+};
+const R1_STAKE = [
+  { id:"riders", icon:"🚲", name:{en:"Regular riders",de:"Stammkundschaft"}, role:{en:"use the service several times a week",de:"nutzen den Dienst mehrmals pro Woche"},
+    q:[ {ask:{en:"What bothers you most?",de:"Was stört dich am meisten?"}, a:{en:"Honestly, it’s often a hassle. Sometimes there just isn’t a bike.",de:"Ehrlich gesagt ist es oft mühsam. Manchmal ist einfach kein Rad da."}, f:[]},
+        {ask:{en:"When and where exactly?",de:"Wann und wo genau?"}, a:{en:"In the morning, 7 to 9, at the main station and up the hill: all stations empty. In the evening it’s fine.",de:"Morgens zwischen 7 und 9, am Hauptbahnhof und oben am Hang: alle Stationen leer. Abends geht es."}, f:["avail"]},
+        {ask:{en:"Ride along with them for a day",de:"Einen Tag lang mitfahren"}, a:{en:"Even when there is a bike, it often has a flat tyre or broken gears. People take one look and walk away.",de:"Selbst wenn ein Rad da ist, hat es oft einen Platten oder eine kaputte Schaltung. Die Leute schauen kurz und gehen weiter."}, f:["broken"]} ]},
+  { id:"nonusers", icon:"🚶", name:{en:"Non-users",de:"Nicht-Nutzende"}, role:{en:"live in the city but don’t ride",de:"wohnen in der Stadt, fahren aber nicht"},
+    q:[ {ask:{en:"Why don’t you use the bikes?",de:"Warum nutzt du die Räder nicht?"}, a:{en:"There should be more bikes near me. And it’s probably expensive.",de:"Es müsste mehr Räder in meiner Nähe geben. Und es ist wahrscheinlich teuer."}, f:[]},
+        {ask:{en:"What happened when you tried?",de:"Was ist passiert, als du es versucht hast?"}, a:{en:"I downloaded the app once. It wanted my ID, a credit card and a photo. It took ages, so I gave up.",de:"Ich hab die App mal geladen. Sie wollte Ausweis, Kreditkarte und ein Foto. Das hat ewig gedauert, also hab ich aufgegeben."}, f:["signup"]},
+        {ask:{en:"Observe ten people signing up",de:"Zehn Personen bei der Anmeldung beobachten"}, a:{en:"Six out of ten gave up during registration. The four who finished took over ten minutes.",de:"Sechs von zehn haben bei der Registrierung aufgegeben. Die vier, die es geschafft haben, brauchten über zehn Minuten."}, f:["signup"]} ]},
+  { id:"maint", icon:"🔧", name:{en:"Maintenance crew",de:"Wartungsteam"}, role:{en:"repair and service the fleet",de:"reparieren und warten die Flotte"},
+    q:[ {ask:{en:"How is the fleet doing?",de:"Wie steht es um die Flotte?"}, a:{en:"The fleet is fine. We fix everything that gets reported.",de:"Die Flotte ist in Ordnung. Wir reparieren alles, was gemeldet wird."}, f:[]},
+        {ask:{en:"How many bikes are broken right now?",de:"Wie viele Räder sind gerade defekt?"}, a:{en:"Honestly? Maybe one in four. Users hardly report anything, so we don’t know which ones.",de:"Ehrlich? Vielleicht jedes vierte. Es wird kaum etwas gemeldet, also wissen wir nicht, welche."}, f:["broken"]},
+        {ask:{en:"Shadow the crew for a day",de:"Das Team einen Tag begleiten"}, a:{en:"The crew drives the same route every day and never moves bikes between stations. There is no budget for that.",de:"Das Team fährt jeden Tag dieselbe Route und verteilt nie Räder zwischen Stationen um. Dafür gibt es kein Budget."}, f:["pile"]} ]},
+  { id:"data", icon:"📊", name:{en:"Data analyst",de:"Datenanalyse"}, role:{en:"has all usage data",de:"hat alle Nutzungsdaten"},
+    q:[ {ask:{en:"What does the usage data say?",de:"Was sagen die Nutzungsdaten?"}, a:{en:"Total rides are falling and average use per bike is low.",de:"Die Fahrten gehen insgesamt zurück, die durchschnittliche Nutzung pro Rad ist niedrig."}, f:[]},
+        {ask:{en:"Show usage by station and hour",de:"Nutzung nach Station und Uhrzeit zeigen"}, a:{en:"The riverside stations are full all day. Uphill and at the main station they are empty by 8 am.",de:"Die Stationen am Fluss sind den ganzen Tag voll. Am Hang und am Hauptbahnhof sind sie um 8 Uhr leer."}, f:["avail","pile"]},
+        {ask:{en:"Analyse last year’s price cut",de:"Die Preissenkung vom letzten Jahr analysieren"}, a:{en:"A 20 % price cut barely changed the number of rides.",de:"Eine Preissenkung um 20 % hat die Zahl der Fahrten kaum verändert."}, f:["price"]} ]},
+  { id:"council", icon:"🏛️", name:{en:"City council",de:"Stadtrat"}, role:{en:"funds the service",de:"finanziert den Dienst"},
+    q:[ {ask:{en:"What do you expect?",de:"Was erwarten Sie?"}, a:{en:"More rides, or we cut the subsidy. We could pay for 200 new bikes.",de:"Mehr Fahrten, sonst kürzen wir die Förderung. Wir könnten 200 neue Räder bezahlen."}, f:[]},
+        {ask:{en:"Why more bikes?",de:"Warum mehr Räder?"}, a:{en:"Because people keep telling us there are never any bikes.",de:"Weil uns die Leute ständig sagen, dass nie Räder da sind."}, f:[]},
+        {ask:{en:"Review the funding contract",de:"Den Fördervertrag prüfen"}, a:{en:"Funding is tied to rides per bike. More bikes alone would lower that number.",de:"Die Förderung hängt an Fahrten pro Rad. Mehr Räder allein würden diese Zahl senken."}, f:["kpi"]} ]}
+];
+const R1_FRAMES = [
+  { id:"more",   q:0.15, need:[],                 t:{en:"The service needs more bikes.", de:"Der Dienst braucht mehr Räder."} },
+  { id:"price",  q:0.10, need:[],                 t:{en:"Rides are too expensive.", de:"Die Fahrten sind zu teuer."} },
+  { id:"aware",  q:0.20, need:[],                 t:{en:"Too few people know the service.", de:"Zu wenige Menschen kennen den Dienst."} },
+  { id:"signup", q:0.40, need:[["signup"]],       t:{en:"Signing up is too hard.", de:"Die Anmeldung ist zu kompliziert."} },
+  { id:"broken", q:0.55, need:[["broken"]],       t:{en:"Too many bikes are broken.", de:"Zu viele Räder sind defekt."} },
+  { id:"avail",  q:0.70, need:[["avail"],["pile"]], t:{en:"Bikes are not where people need them at peak times.", de:"Die Räder sind zu Stoßzeiten nicht dort, wo sie gebraucht werden."} },
+  { id:"both",   q:1.00, need:[["broken","avail"],["broken","pile"]], t:{en:"Working bikes are not where and when people need them.", de:"Funktionsfähige Räder sind nicht dort und dann, wo und wann sie gebraucht werden."} }
+];
+
+/* ---------------------------------------------------------------- round 2 content (clinic, level of abstraction) */
+/* up-chain reached by asking "Why?"; side frames found by investigating "What's stopping us?" (from level 1) */
+const R2_UP = [
+  { id:"u0", imp:0.25, act:0.95, t:{en:"How might we send more reminder text messages?", de:"Wie könnten wir mehr Erinnerungs-SMS verschicken?"},
+    why:{en:"Why send more reminders?", de:"Warum mehr Erinnerungen?"}, ans:{en:"“Because one in five patients misses their appointment.”", de:"„Weil jede fünfte Person ihren Termin verpasst.“"} },
+  { id:"u1", imp:0.55, act:0.75, t:{en:"How might we reduce missed appointments?", de:"Wie könnten wir verpasste Termine reduzieren?"},
+    why:{en:"Why does that matter?", de:"Warum ist das wichtig?"}, ans:{en:"“Because patients who miss follow-ups get their treatment too late.”", de:"„Weil Menschen, die Folgetermine verpassen, ihre Behandlung zu spät bekommen.“"} },
+  { id:"u2", imp:0.85, act:0.45, t:{en:"How might we make sure patients get care at the right time?", de:"Wie könnten wir sicherstellen, dass Patientinnen und Patienten rechtzeitig versorgt werden?"},
+    why:{en:"And why does that matter?", de:"Und warum ist das wichtig?"}, ans:{en:"“Because in the end, we want a healthier city.”", de:"„Weil wir am Ende eine gesündere Stadt wollen.“"} },
+  { id:"u3", imp:1.00, act:0.12, t:{en:"How might we improve the health of our city?", de:"Wie könnten wir die Gesundheit unserer Stadt verbessern?"} }
+];
+const R2_SIDE = [
+  { id:"s1", imp:0.80, act:0.85, icon:"🧑", who:{en:"Ask patients who missed an appointment", de:"Menschen fragen, die einen Termin verpasst haben"},
+    ans:{en:"“I knew I couldn’t make it, but the phone line is only open from 9 to 11 and always busy. So I just didn’t come.”", de:"„Ich wusste, dass ich es nicht schaffe, aber die Telefonleitung ist nur von 9 bis 11 offen und immer besetzt. Also bin ich einfach nicht gekommen.“"},
+    t:{en:"How might we make cancelling or rescheduling effortless?", de:"Wie könnten wir das Absagen oder Verschieben mühelos machen?"} },
+  { id:"s2", imp:0.55, act:0.90, icon:"📊", who:{en:"Analyse the appointment data", de:"Die Termindaten analysieren"},
+    ans:{en:"Appointments booked more than three months ahead are missed three times as often.", de:"Termine, die mehr als drei Monate im Voraus gebucht werden, werden dreimal so oft verpasst."},
+    t:{en:"How might we keep long-booked appointments on patients’ minds?", de:"Wie könnten wir lange im Voraus gebuchte Termine im Gedächtnis halten?"} },
+  { id:"s3", imp:0.60, act:0.85, icon:"🗂️", who:{en:"Ask the reception staff", de:"Das Empfangspersonal fragen"},
+    ans:{en:"“When someone cancels, we have no way to offer the slot to anyone else at short notice.”", de:"„Wenn jemand absagt, können wir den Termin kurzfristig niemand anderem anbieten.“"},
+    t:{en:"How might we refill freed slots quickly?", de:"Wie könnten wir frei gewordene Termine schnell neu vergeben?"} },
+  { id:"s4", imp:0.60, act:0.65, icon:"🩺", who:{en:"Ask the doctors", de:"Die Ärztinnen und Ärzte fragen"},
+    ans:{en:"“Many patients don’t understand why the follow-up matters once they feel better.”", de:"„Viele verstehen nicht, warum der Folgetermin wichtig ist, sobald es ihnen besser geht.“"},
+    t:{en:"How might we help patients understand why the follow-up matters?", de:"Wie könnten wir verständlich machen, warum der Folgetermin wichtig ist?"} }
+];
+
+/* ---------------------------------------------------------------- round 3 content (meal-kit start-up, AI vs field) */
+const R3_AI = [
+  { id:"a1", cost:0.5, ask:{en:"“Give me ideas for more exciting recipes.”", de:"„Gib mir Ideen für spannendere Rezepte.“"},
+    ans:{en:"Great idea! Here are eight exciting directions: seasonal street food, one-pot fusion dishes, a weekly chef’s special, regional German classics with a twist, plant-based comfort food, 20-minute date-night menus, kids’ favourites, and spice discovery boxes.", de:"Gute Idee! Hier sind acht spannende Richtungen: saisonales Streetfood, One-Pot-Fusionsgerichte, ein wöchentliches Spezialgericht, regionale Klassiker mit Twist, pflanzliches Soulfood, 20-Minuten-Menüs für zwei, Lieblingsgerichte für Kinder und Gewürz-Entdeckerboxen."},
+    unlock:[] },
+  { id:"a2", cost:0.5, ask:{en:"“Why do customers cancel meal-kit subscriptions?”", de:"„Warum kündigen Kundinnen und Kunden Kochbox-Abos?“"},
+    ans:{en:"Common reasons include price, too little recipe variety, portion sizes that don’t fit the household, food waste, deliveries at inconvenient times, and too little time to cook.", de:"Häufige Gründe sind der Preis, zu wenig Abwechslung bei den Rezepten, Portionsgrößen, die nicht zum Haushalt passen, Lebensmittelverschwendung, ungünstige Lieferzeiten und zu wenig Zeit zum Kochen."},
+    unlock:["price","delivery","time","portions"] },
+  { id:"a3", cost:0.5, ask:{en:"“Challenge my assumption that recipes are the problem.”", de:"„Hinterfrage meine Annahme, dass die Rezepte das Problem sind.“"},
+    ans:{en:"Possible blind spots: complaints about recipes may be a symptom. You have no data on why customers actually leave. Compare cancellation rates across customer groups and talk to people who cancelled.", de:"Mögliche blinde Flecken: Beschwerden über Rezepte können ein Symptom sein. Du hast keine Daten dazu, warum Menschen tatsächlich kündigen. Vergleiche Kündigungsraten zwischen Kundengruppen und sprich mit Menschen, die gekündigt haben."},
+    unlock:[], hint:true },
+  { id:"a4", cost:0.5, ask:{en:"“Is ‘we need more recipes’ the right problem?”", de:"„Ist ‚Wir brauchen mehr Rezepte‘ das richtige Problem?“"},
+    ans:{en:"That sounds like a well-reasoned problem statement. Recipe variety is a known driver of subscription satisfaction, so focusing on it makes sense.", de:"Das klingt nach einer gut begründeten Problemstellung. Rezeptvielfalt ist ein bekannter Treiber der Zufriedenheit mit Abos, daher ist der Fokus darauf sinnvoll."},
+    unlock:[], sycophant:true }
+];
+const R3_FIELD = [
+  { id:"f1", cost:2, icon:"🎧", ask:{en:"Read the customer service tickets", de:"Die Kundenservice-Tickets lesen"},
+    ans:{en:"Many complaints that food goes off before it gets cooked. Very few mention the recipes.", de:"Viele Beschwerden, dass Lebensmittel verderben, bevor sie gekocht werden. Kaum jemand erwähnt die Rezepte."}, ev:["portions"] },
+  { id:"f2", cost:3, icon:"🗣️", ask:{en:"Interview five customers who cancelled", de:"Fünf Menschen interviewen, die gekündigt haben"},
+    ans:{en:"Four of them live alone or as a couple. Each box contains four portions; half the food ended up in the bin. “The recipes were nice, actually.”", de:"Vier von ihnen leben allein oder zu zweit. Jede Box enthält vier Portionen; die Hälfte landete im Müll. „Die Rezepte waren eigentlich schön.“"}, ev:["portions"] },
+  { id:"f3", cost:2, icon:"📊", ask:{en:"Compare cancellations by household size", de:"Kündigungen nach Haushaltsgröße vergleichen"},
+    ans:{en:"One- and two-person households cancel twice as often as families.", de:"Ein- und Zwei-Personen-Haushalte kündigen doppelt so oft wie Familien."}, ev:["portions"] },
+  { id:"f4", cost:1, icon:"👥", ask:{en:"Ask the founder’s friends", de:"Die Freundinnen und Freunde der Gründerin fragen"},
+    ans:{en:"“We love it! Maybe add a few more vegetarian recipes.”", de:"„Wir lieben es! Vielleicht noch ein paar vegetarische Rezepte mehr.“"}, ev:["recipes"] }
+];
+const R3_FRAMES = [
+  { id:"recipes",  q:0.15, base:true, t:{en:"Our recipes are not exciting enough.", de:"Unsere Rezepte sind nicht spannend genug."} },
+  { id:"price",    q:0.15, t:{en:"Our boxes are too expensive.", de:"Unsere Boxen sind zu teuer."} },
+  { id:"delivery", q:0.20, t:{en:"Deliveries arrive at inconvenient times.", de:"Die Lieferungen kommen zu ungünstigen Zeiten."} },
+  { id:"time",     q:0.25, t:{en:"Cooking takes customers too long.", de:"Das Kochen dauert den Kundinnen und Kunden zu lange."} },
+  { id:"portions", q:1.00, t:{en:"Our boxes don’t fit small households: too much food goes to waste.", de:"Unsere Boxen passen nicht zu kleinen Haushalten: Zu viel landet im Müll."} }
+];
+
+/* ---------------------------------------------------------------- texts */
+const T = {
+  en: {
+    title:"Fix the bike-sharing problem", brand:"A problem-framing exercise", roundsL:["Round 1","Round 2","Round 3","Summary"],
+    introH:"The wrong problem: three cases", introP:"Three short cases, each about 6 minutes. In each one, a client tells you what the problem is. Your job is to find out whether they are right.",
+    introList:["Round 1: How much research is enough?","Round 2: At which level should you frame the problem?","Round 3: What can AI tell you, and what not?"],
+    consentH:"Research use", consentP:"Your choices are saved in ILIAS and are not graded. With your permission, pseudonymised data are used for research.",
+    yes:"Yes, my pseudonymised data may be used for research.", no:"No, use my data only for the class discussion.", start:"Start round 1",
+    preview:"Preview mode: not connected to ILIAS. Nothing is saved.", practice:"Practice run: not saved",
+    next:"Next round", toSummary:"See the summary", choose:"Confirm my frame", back:"Back",
+    lockedHint:"Not supported by what you found out", got:"Found", miss:"Missed", wk:(w)=> w===0.5?"½ week": w===1?"1 week":`${w} weeks`,
+    dayc:(d)=> d===0.5?"½ day": d===1?"1 day":`${d} days`,
+    /* round 1 */
+    r1H:"Fix the bike-sharing problem", r1Pill:"About 5 minutes",
+    r1Intro:["You are the new innovation manager of RideOn, the city’s bike-sharing service (fictional). Rides have been falling for two years.",
+             "The city council, which funds the service, is clear: “We need more bikes.”",
+             "The summer season starts in 12 weeks. Every week you spend on research is a week less of improved service in the season."],
+    r1How:"Talk to five stakeholders. Each question costs time: a quick question ½ week, a follow-up 1 week, a deep dive 2 weeks. Stop whenever you like and frame the problem.",
+    weeksUsed:"Research time used", impactLeft:"Season impact still possible", frameNow:"Stop and frame the problem",
+    stakeH:"Stakeholders", notesH:"Your notes", noNotes:"Nothing yet. Choose a stakeholder and ask a question.",
+    levels:["Quick question","Follow up","Deep dive"],
+    frameH:"Frame the problem", frameP:"Which statement describes the problem RideOn should solve? Only frames backed by your findings are available.",
+    resQuality:"quality of your frame", resImpact:"season impact left", resScore:"result",
+    curveH:"Too little, too much", curveP:"The line shows the best result reachable for each amount of research time. Your dot shows where you ended up.",
+    xLabel:"Weeks of research", yLabel:"Best possible result", factsH:"What there was to find",
+    r1_good:"You found the real problem and stopped in time.", r1_late:"You found what you needed, then kept going. The extra questions cost season time without changing your frame.",
+    r1_okay:"You found part of the real problem. One more targeted follow-up would have changed your frame.", r1_early:"You framed the problem before you knew enough. That is how teams end up solving the wrong problem precisely.",
+    r1Lesson:"<b>Value of information:</b> research pays off only while it can still change your frame. Ask where the answers are likely to differ, dig deeper there, and stop when the next question is unlikely to change your frame.",
+    /* round 2 */
+    r2H:"Round 2: At which level?", r2Pill:"Hospital clinic",
+    r2Intro:["The outpatient clinic of City Hospital (fictional) has a problem: one in five patients misses their appointment.",
+             "The clinic manager has already decided: “We need to send more reminder text messages.”",
+             "Ask “Why?” to move the problem up the ladder, and “What’s stopping us?” to find concrete obstacles. Then choose the level at which to frame it."],
+    ladderH:"The problem ladder", hiddenRung:"Ask “Why?” to reveal", askWhy:"Ask: ", stopH:"What’s stopping us?", stopP:"Find out what stops patients from keeping their appointments. Each investigation reduces your result by 3 %.",
+    stopLocked:"First ask “Why?” at least once.", invCost:"−3 %", decide:"Choose the level and frame",
+    r2Frame:"Which frame will you work with?", r2resH:"Impact and actionability", r2resP:"Each dot is a frame. Up is more impact, right is easier to act on. The best frames sit in the top right.",
+    impact:"Impact potential", action:"Actionability", legend:["your choice","frames you found","frames you did not find"],
+    r2_narrow:"Too narrow: the solution was already in the question. Text messages can only fix a small part of the problem.",
+    r2_broad:"Inspiring, but too broad to act on. Nobody knows where to start with this frame.",
+    r2_mid:"A good level, but you did not ask what actually stops patients. The frame is still vague about where to act.",
+    r2_side:"Concrete and actionable, but not the biggest obstacle. Patients themselves told you what stops them most.",
+    r2_best:"The right level: broad enough to matter, concrete enough to act on, and based on what really stops patients.",
+    r2Lesson:"<b>The right level:</b> “Why?” makes a problem bigger and more inspiring; “What’s stopping us?” makes it concrete. The best frame is broad enough to matter and narrow enough to act on.",
+    /* round 3 */
+    r3H:"Round 3: What can AI tell you?", r3Pill:"Meal-kit start-up",
+    r3Intro:["FreshBox (fictional) delivers meal kits with recipes and ingredients. 60 % of new customers cancel within their first month.",
+             "The founder is sure: “Our recipes are boring. We need more recipes.”",
+             "The investors meet in 10 days. Asking the AI assistant takes half a day; research in the field takes longer."],
+    daysUsed:"Days used", daysLeft:"Days until the investor meeting", aiH:"AI assistant", fieldH:"Field research", aiSuggests:"suggested by AI",
+    noTime:"Not enough time left", conf:"How confident are you that this is the right problem?", confL:"Not at all", confH:"Completely",
+    hyp:"hypothesis", evid:"evidence",
+    r3resH:"Convinced or correct?", r3Conv:"How convinced you were", r3Corr:"How right you were",
+    r3_good:"You used AI for hypotheses and checked them in the field. That is exactly the division of labour that works.",
+    r3_noev:"The right idea, but no evidence. The AI gave you a hypothesis, not an answer, and the investors want proof.",
+    r3_conf:"Confident and wrong. The AI helped you to make the wrong frame sound convincing.",
+    r3_wrong:"You stayed inside the founder’s frame. More recipes will not stop small households from throwing away half the box.",
+    r3_syc:"Note: when you asked the AI whether your frame was right, it simply agreed with you.",
+    r3Lesson:"<b>AI and problem framing:</b> AI is fast at generating hypotheses and quick to agree with you. Whether a frame is right is decided by evidence from the field.",
+    /* summary */
+    sumH:"Your three cases", sumP:"Three different traps when framing problems:", avg:"average result",
+    again:"Play again", webNote:"A short exercise on problem framing by Felix Mosner, University of Cologne. The case is fictional. Nothing you enter is stored or sent anywhere.", lecH:"Lecturer view: answer key", src:"Fictional cases for teaching."
+  },
+  de: {
+    title:"Das Bikesharing-Problem lösen", brand:"Eine Übung zur Problemrahmung", roundsL:["Runde 1","Runde 2","Runde 3","Fazit"],
+    introH:"Das falsche Problem: drei Fälle", introP:"Drei kurze Fälle, je etwa 6 Minuten. In jedem sagt dir jemand, was das Problem ist. Deine Aufgabe ist herauszufinden, ob das stimmt.",
+    introList:["Runde 1: Wie viel Recherche ist genug?","Runde 2: Auf welcher Ebene solltest du das Problem rahmen?","Runde 3: Was kann dir KI sagen, und was nicht?"],
+    consentH:"Forschungsnutzung", consentP:"Deine Entscheidungen werden in ILIAS gespeichert und nicht bewertet. Mit deiner Zustimmung werden pseudonymisierte Daten für die Forschung genutzt.",
+    yes:"Ja, meine pseudonymisierten Daten dürfen für die Forschung genutzt werden.", no:"Nein, meine Daten nur für die Diskussion im Kurs verwenden.", start:"Runde 1 starten",
+    preview:"Vorschaumodus: nicht mit ILIAS verbunden. Es wird nichts gespeichert.", practice:"Übungsdurchgang: wird nicht gespeichert",
+    next:"Nächste Runde", toSummary:"Zum Fazit", choose:"Rahmung bestätigen", back:"Zurück",
+    lockedHint:"Durch deine Erkenntnisse nicht gestützt", got:"Gefunden", miss:"Übersehen", wk:(w)=> w===0.5?"½ Woche": w===1?"1 Woche":`${w} Wochen`,
+    dayc:(d)=> d===0.5?"½ Tag": d===1?"1 Tag":`${d} Tage`,
+    r1H:"Das Bikesharing-Problem lösen", r1Pill:"Etwa 5 Minuten",
+    r1Intro:["Du bist neu im Innovationsmanagement von RideOn, dem Bikesharing der Stadt (fiktiv). Die Fahrten gehen seit zwei Jahren zurück.",
+             "Der Stadtrat, der den Dienst finanziert, ist eindeutig: „Wir brauchen mehr Räder.“",
+             "In 12 Wochen beginnt die Sommersaison. Jede Woche Recherche ist eine Woche weniger verbesserter Service in der Saison."],
+    r1How:"Sprich mit fünf Beteiligten. Jede Frage kostet Zeit: eine kurze Frage ½ Woche, Nachhaken 1 Woche, in die Tiefe gehen 2 Wochen. Hör auf, wann du willst, und rahme das Problem.",
+    weeksUsed:"Verbrauchte Recherchezeit", impactLeft:"Noch möglicher Saisoneffekt", frameNow:"Aufhören und Problem rahmen",
+    stakeH:"Beteiligte", notesH:"Deine Notizen", noNotes:"Noch nichts. Wähle eine Person und stelle eine Frage.",
+    levels:["Kurze Frage","Nachhaken","In die Tiefe gehen"],
+    frameH:"Das Problem rahmen", frameP:"Welche Aussage beschreibt das Problem, das RideOn lösen sollte? Verfügbar sind nur Rahmungen, die deine Erkenntnisse stützen.",
+    resQuality:"Qualität deiner Rahmung", resImpact:"übriger Saisoneffekt", resScore:"Ergebnis",
+    curveH:"Zu wenig, zu viel", curveP:"Die Linie zeigt das beste erreichbare Ergebnis für jede Menge an Recherchezeit. Dein Punkt zeigt, wo du gelandet bist.",
+    xLabel:"Wochen Recherche", yLabel:"Bestmögliches Ergebnis", factsH:"Was es zu finden gab",
+    r1_good:"Du hast das eigentliche Problem gefunden und rechtzeitig aufgehört.", r1_late:"Du hattest gefunden, was du brauchtest, und hast trotzdem weitergemacht. Die zusätzlichen Fragen haben Saisonzeit gekostet, ohne deine Rahmung zu ändern.",
+    r1_okay:"Du hast einen Teil des eigentlichen Problems gefunden. Eine gezielte Nachfrage mehr hätte deine Rahmung verändert.", r1_early:"Du hast das Problem gerahmt, bevor du genug wusstest. So lösen Teams am Ende sehr präzise das falsche Problem.",
+    r1Lesson:"<b>Wert von Information:</b> Recherche lohnt sich nur, solange sie deine Rahmung noch verändern kann. Frag dort, wo die Antworten wahrscheinlich auseinandergehen, geh dort in die Tiefe und hör auf, wenn die nächste Frage deine Rahmung kaum noch ändern würde.",
+    r2H:"Runde 2: Auf welcher Ebene?", r2Pill:"Klinikambulanz",
+    r2Intro:["Die Ambulanz des Stadtklinikums (fiktiv) hat ein Problem: Jede fünfte Person verpasst ihren Termin.",
+             "Die Leitung hat schon entschieden: „Wir müssen mehr Erinnerungs-SMS verschicken.“",
+             "Frag „Warum?“, um das Problem auf der Leiter nach oben zu bewegen, und „Was hält uns auf?“, um konkrete Hindernisse zu finden. Wähle dann die Ebene, auf der du das Problem rahmst."],
+    ladderH:"Die Problemleiter", hiddenRung:"Frag „Warum?“, um sie aufzudecken", askWhy:"Frage: ", stopH:"Was hält uns auf?", stopP:"Finde heraus, was Patientinnen und Patienten davon abhält, ihre Termine wahrzunehmen. Jede Untersuchung senkt dein Ergebnis um 3 %.",
+    stopLocked:"Frag zuerst mindestens einmal „Warum?“.", invCost:"−3 %", decide:"Ebene und Rahmung wählen",
+    r2Frame:"Mit welcher Rahmung arbeitest du weiter?", r2resH:"Wirkung und Umsetzbarkeit", r2resP:"Jeder Punkt ist eine Rahmung. Oben bedeutet mehr Wirkung, rechts leichter umsetzbar. Die besten Rahmungen liegen oben rechts.",
+    impact:"Wirkungspotenzial", action:"Umsetzbarkeit", legend:["deine Wahl","gefundene Rahmungen","nicht gefundene Rahmungen"],
+    r2_narrow:"Zu eng: Die Lösung steckte schon in der Frage. SMS können nur einen kleinen Teil des Problems lösen.",
+    r2_broad:"Inspirierend, aber zu breit, um zu handeln. Mit dieser Rahmung weiß niemand, wo man anfangen soll.",
+    r2_mid:"Eine gute Ebene, aber du hast nicht gefragt, was Patientinnen und Patienten tatsächlich aufhält. Die Rahmung bleibt unklar, wo man ansetzen soll.",
+    r2_side:"Konkret und umsetzbar, aber nicht das größte Hindernis. Die Betroffenen selbst haben dir gesagt, was sie am meisten aufhält.",
+    r2_best:"Die richtige Ebene: breit genug, um etwas zu bewirken, konkret genug, um zu handeln, und gestützt auf das, was Menschen wirklich aufhält.",
+    r2Lesson:"<b>Die richtige Ebene:</b> „Warum?“ macht ein Problem größer und inspirierender; „Was hält uns auf?“ macht es konkret. Die beste Rahmung ist breit genug, um etwas zu bewirken, und eng genug, um zu handeln.",
+    r3H:"Runde 3: Was kann dir KI sagen?", r3Pill:"Kochbox-Start-up",
+    r3Intro:["FreshBox (fiktiv) liefert Kochboxen mit Rezepten und Zutaten. 60 % der Neukundinnen und Neukunden kündigen im ersten Monat.",
+             "Die Gründerin ist sicher: „Unsere Rezepte sind langweilig. Wir brauchen mehr Rezepte.“",
+             "In 10 Tagen treffen sich die Investorinnen und Investoren. Eine Frage an den KI-Assistenten dauert einen halben Tag; Recherche vor Ort dauert länger."],
+    daysUsed:"Verbrauchte Tage", daysLeft:"Tage bis zum Investorentreffen", aiH:"KI-Assistent", fieldH:"Recherche vor Ort", aiSuggests:"von der KI vorgeschlagen",
+    noTime:"Nicht mehr genug Zeit", conf:"Wie sicher bist du, dass das das richtige Problem ist?", confL:"Gar nicht", confH:"Völlig",
+    hyp:"Hypothese", evid:"Beleg",
+    r3resH:"Überzeugt oder richtig?", r3Conv:"Wie überzeugt du warst", r3Corr:"Wie richtig du lagst",
+    r3_good:"Du hast die KI für Hypothesen genutzt und sie vor Ort überprüft. Genau diese Arbeitsteilung funktioniert.",
+    r3_noev:"Die richtige Idee, aber ohne Beleg. Die KI hat dir eine Hypothese gegeben, keine Antwort, und die Investoren wollen Beweise.",
+    r3_conf:"Sicher und falsch. Die KI hat dir geholfen, die falsche Rahmung überzeugend klingen zu lassen.",
+    r3_wrong:"Du bist im Rahmen der Gründerin geblieben. Mehr Rezepte halten kleine Haushalte nicht davon ab, die halbe Box wegzuwerfen.",
+    r3_syc:"Übrigens: Als du die KI gefragt hast, ob deine Rahmung stimmt, hat sie dir einfach zugestimmt.",
+    r3Lesson:"<b>KI und Problemrahmung:</b> KI erzeugt schnell Hypothesen und stimmt dir schnell zu. Ob eine Rahmung stimmt, entscheiden Belege aus der Praxis.",
+    sumH:"Deine drei Fälle", sumP:"Drei verschiedene Fallen bei der Problemrahmung:", avg:"durchschnittliches Ergebnis",
+    again:"Noch einmal spielen", webNote:"Eine kurze Übung zur Problemrahmung von Felix Mosner, Universität zu Köln. Der Fall ist fiktiv. Nichts, was du eingibst, wird gespeichert oder übertragen.", lecH:"Ansicht für Lehrende: Lösung", src:"Fiktive Fälle für die Lehre."
+  }
+};
+
+/* ---------------------------------------------------------------- SCORM 2004 */
+const SCORM = {
+  api:null, t0:Date.now(), done:false,
+  find(){ let w=window,n=0; try{ while(w&&!w.API_1484_11&&w.parent&&w.parent!==w&&n<500){n++;w=w.parent;} }catch(e){}
+    try{ if(w&&w.API_1484_11) return w.API_1484_11; }catch(e){}
+    try{ if(window.top&&window.top.opener){ let o=window.top.opener,k=0; while(o&&!o.API_1484_11&&o.parent&&o.parent!==o&&k<500){k++;o=o.parent;} if(o&&o.API_1484_11) return o.API_1484_11; } }catch(e){}
+    return null; },
+  init(){ this.api=this.find(); if(this.api) this.api.Initialize(""); return !!this.api; },
+  get(k){ return this.api?this.api.GetValue(k):""; }, set(k,v){ if(this.api) this.api.SetValue(k,String(v)); },
+  commit(){ if(this.api) this.api.Commit(""); },
+  finish(){ if(!this.api||this.done) return; this.done=true; this.set("cmi.session_time",dur((Date.now()-this.t0)/1000)); this.set("cmi.exit","suspend"); this.commit(); this.api.Terminate(""); },
+  rec(id,type,resp,opt={}){ if(!this.api) return; const n=parseInt(this.get("cmi.interactions._count"),10)||0, p="cmi.interactions."+n+".";
+    this.set(p+"id",id); this.set(p+"type",type); this.set(p+"timestamp",new Date().toISOString().slice(0,19));
+    this.set(p+"learner_response",String(resp).slice(0,3900)); if(opt.desc) this.set(p+"description",String(opt.desc).slice(0,250)); }
+};
+function dur(s){ const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=(s%60).toFixed(1); return "PT"+h+"H"+m+"M"+x+"S"; }
+
+/* ---------------------------------------------------------------- state */
+const params=new URLSearchParams(location.search);
+const live=SCORM.init();
+const fresh=()=>({ r1:{asked:[],done:false}, r2:{up:0,side:[],inv:0,done:false}, r3:{used:[],done:false}, round:1 });
+let st=null; try{ st=live?JSON.parse(SCORM.get("cmi.suspend_data")||"null"):null; }catch(e){ st=null; }
+if(!st) st=Object.assign({lang:null,consent:null,started:false}, fresh());
+let lang=st.lang||"en";
+if(params.get("lang")==="de"||params.get("lang")==="en") lang=params.get("lang");
+let practice=false, P=null;
+const S=()=> practice?P:st;
+const L=()=>T[lang];
+const rec=(id,type,v,desc)=>{ if(!practice) SCORM.rec(id,type,v,{desc}); };
+function save(){ if(!live||practice) return; st.lang=lang; SCORM.set("cmi.suspend_data",JSON.stringify(st)); SCORM.set("cmi.exit","suspend");
+  const done=[st.r1.done,st.r2.done,st.r3.done].filter(Boolean).length;
+  SCORM.set("cmi.progress_measure",(done/3).toFixed(2)); SCORM.set("cmi.completion_status",done===3?"completed":"incomplete"); SCORM.commit(); }
+window.addEventListener("pagehide",()=>{save();SCORM.finish();}); window.addEventListener("beforeunload",()=>{save();SCORM.finish();});
+
+/* ---------------------------------------------------------------- ui shell */
+const app=document.getElementById("app");
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const num=v=> lang==="de"? String(v).replace(".",",") : String(v);
+let render=()=>{};
+function view(html,after){ document.documentElement.lang=lang; document.title=L().title; const s=S(), r=s?s.round:1;
+  app.innerHTML=`<header class="top"><div class="brand"><span class="logo">🧭</span>${L().brand}</div><button class="ghost" id="lng" style="padding:.35rem .7rem;font-size:.82rem">${lang==="de"?"English":"Deutsch"}</button></header>`+
+    ""+(practice?`<div class="banner">${L().practice}</div>`:"")+
+    (false?`<div class="rounds">${L().roundsL.map((x,i)=>`<span class="${i+1<r?"done":i+1===r?"now":""}">${x}</span>`).join("")}</div>`:"")+html;
+  document.getElementById("lng").onclick=()=>{ lang=lang==="de"?"en":"de"; save(); render(); };
+  try{ window.scrollTo(0,0); }catch(e){}
+  if(after) after(); }
+const radios=(sel,cb)=>app.querySelectorAll(sel).forEach(r=>r.onchange=()=>{ app.querySelectorAll(".opt").forEach(o=>o.classList.toggle("on",o.querySelector("input")&&o.querySelector("input").checked)); cb(r.value); });
+function next(){ const s=S(); s.round++; save(); route(); }
+function route(){ const s=S(); if(s.round===1) return s.r1.done?r1Result():r1Play(); if(s.round===2) return s.r2.done?r2Result():(s.r2.seen?r2Play():r2Intro());
+  if(s.round===3) return s.r3.done?r3Result():(s.r3.seen?r3Play():r3Intro()); return summary(); }
+
+function welcome(){ render=welcome; const t=L();
+  view(`<section class="card hero"><h1>${t.introH}</h1><p>${t.introP}</p><ul style="margin:0;padding-left:1.1rem">${t.introList.map(x=>`<li>${x}</li>`).join("")}</ul></section>
+    <section class="card"><h3>${t.consentH}</h3><p class="small muted">${t.consentP}</p>
+      <label class="opt${st.consent===true?" on":""}"><input type="radio" name="c" value="yes"${st.consent===true?" checked":""}><span>${t.yes}</span></label>
+      <label class="opt${st.consent===false?" on":""}"><input type="radio" name="c" value="no"${st.consent===false?" checked":""}><span>${t.no}</span></label>
+      <div class="actions"><button id="go"${st.consent===null?" disabled":""}>${t.start}</button></div></section>`,()=>{
+    radios("input[name=c]",v=>{ st.consent=v==="yes"; document.getElementById("go").disabled=false; });
+    document.getElementById("go").onclick=()=>{ SCORM.rec("consent","true-false",st.consent?"true":"false",{desc:"Research consent"}); SCORM.rec("language","fill-in",lang);
+      st.started=true; save(); r1Intro(); }; }); }
+function introCard(h,pill,paras,extra,go){ view(`<section class="card hero"><span class="pill">${pill}</span><h1>${h}</h1>${paras.map(p=>`<p>${esc(p)}</p>`).join("")}</section>
+  ${extra?`<section class="card"><p style="margin:0">${esc(extra)}</p></section>`:""}<div class="actions"><button id="go">${lang==="de"?"Los geht’s":"Start"}</button></div>`,()=>{ document.getElementById("go").onclick=go; }); }
+
+/* ================================================================ ROUND 1 */
+const r1Weeks=s=>s.asked.reduce((a,k)=>a+R1.cost[+k.split(":")[1]],0);
+const r1Impact=w=>Math.max(R1.minImpact,1-R1.decay*w);
+function r1Known(asked){ const k=new Set(); asked.forEach(x=>{ const [sid,l]=x.split(":"); R1_STAKE.find(y=>y.id===sid).q[+l].f.forEach(f=>k.add(f)); }); return k; }
+const unlockedBy=(fr,k)=>fr.need.length===0||fr.need.some(set=>set.every(f=>k.has(f)));
+const R1_CURVE=(()=>{ const items=[]; R1_STAKE.forEach(s=>[0,1,2].forEach(l=>items.push([s.id,l]))); const best={};
+  for(let m=0;m<(1<<items.length);m++){ let ok=true,w=0; const a=[];
+    for(let i=0;i<items.length;i++) if(m&(1<<i)){ const [sid,l]=items[i]; if(l>0&&!(m&(1<<(i-1)))){ok=false;break;} w+=R1.cost[l]; a.push(sid+":"+l); }
+    if(!ok) continue; const k=r1Known(a); const q=Math.max(...R1_FRAMES.filter(f=>unlockedBy(f,k)).map(f=>f.q)); const sc=q*r1Impact(w);
+    if(best[w]===undefined||sc>best[w]) best[w]=sc; }
+  return Object.keys(best).map(Number).sort((a,b)=>a-b).map(w=>[w,best[w]]); })();
+
+function r1Intro(){ render=r1Intro; const t=L(); introCard(t.r1H,t.r1Pill,t.r1Intro,t.r1How,()=>r1Play()); }
+function r1Play(isNew){ render=r1Play; const t=L(), s=S().r1, w=r1Weeks(s), imp=r1Impact(w);
+  view(`<div class="dash"><div class="meter"><span>${t.weeksUsed}</span><b>${num(w)} / ${R1.seasonWeeks}</b><div class="bar"><i style="width:${Math.min(100,w/R1.seasonWeeks*100)}%"></i></div></div>
+      <div class="meter"><span>${t.impactLeft}</span><b>${Math.round(imp*100)} %</b><div class="bar"><i style="width:${imp*100}%"></i></div></div><button id="frame">${t.frameNow}</button></div>
+    <h2>${t.stakeH}</h2><div class="grid">${R1_STAKE.map(sh=>`<div class="sh"><div class="who"><span class="av">${sh.icon}</span><div><b>${esc(sh.name[lang])}</b><small>${esc(sh.role[lang])}</small></div></div>
+      ${[0,1,2].map(l=>{ const k=sh.id+":"+l, done=s.asked.includes(k), av=l===0||s.asked.includes(sh.id+":"+(l-1));
+        return `<button class="q${done?" done":""}" data-k="${k}" ${done||!av?"disabled":""}><span>${t.levels[l]}: ${esc(sh.q[l].ask[lang])}</span><span class="cost">${done?"✓":t.wk(R1.cost[l])}</span></button>`; }).join("")}</div>`).join("")}</div>
+    <h2 style="margin-top:1.2rem">${t.notesH}</h2>${s.asked.length?`<ul class="notes">${s.asked.slice().reverse().map((k,i)=>{ const [sid,l]=k.split(":"), sh=R1_STAKE.find(x=>x.id===sid);
+      return `<li class="${isNew&&i===0?"new":""}"><small>${sh.icon} ${esc(sh.name[lang])}, ${t.levels[+l].toLowerCase()}</small>“${esc(sh.q[+l].a[lang])}”</li>`; }).join("")}</ul>`:`<p class="muted">${t.noNotes}</p>`}`,()=>{
+    app.querySelectorAll(".q:not([disabled])").forEach(b=>b.onclick=()=>{ s.asked.push(b.dataset.k); rec(`r1_ask_${String(s.asked.length).padStart(2,"0")}`,"fill-in",b.dataset.k,`Round 1 question ${s.asked.length}; weeks so far ${r1Weeks(s)}`); save(); r1Play(true); });
+    document.getElementById("frame").onclick=r1Frame; }); }
+function r1Frame(){ render=r1Frame; const t=L(), s=S().r1, k=r1Known(s.asked); let pick=null;
+  view(`<h1>${t.frameH}</h1><p class="muted">${t.frameP}</p>${R1_FRAMES.map(f=>{ const ok=unlockedBy(f,k);
+      return `<label class="opt${ok?"":" locked"}"><input type="radio" name="f" value="${f.id}" ${ok?"":"disabled"}><span>${esc(f.t[lang])}${ok?"":`<br><small class="muted">${t.lockedHint}</small>`}</span></label>`; }).join("")}
+    <div class="actions"><button id="ok" disabled>${t.choose}</button><button class="ghost" id="back">${t.back}</button></div>`,()=>{
+    radios("input[name=f]",v=>{ pick=v; document.getElementById("ok").disabled=false; });
+    document.getElementById("back").onclick=()=>r1Play();
+    document.getElementById("ok").onclick=()=>{ const fr=R1_FRAMES.find(f=>f.id===pick), w=r1Weeks(s); s.frame=pick; s.score=Math.round(fr.q*r1Impact(w)*100); s.done=true;
+      rec("r1_frame","fill-in",pick,"Round 1 chosen frame"); rec("r1_weeks","numeric",w,"Round 1 weeks of research"); rec("r1_questions","numeric",s.asked.length,"Round 1 questions asked"); rec("r1_score","numeric",s.score,"Round 1 result (0-100)");
+      save(); r1Result(); }; }); }
+function r1Curve(w,sc){ const t=L(),W=560,H=230,p=40,mx=17.5,x=v=>p+v/mx*(W-p-10),y=v=>H-p-v*(H-p-15);
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${t.curveH}"><line x1="${p}" y1="${H-p}" x2="${W-10}" y2="${H-p}" stroke="#CDD2E3"/><line x1="${p}" y1="15" x2="${p}" y2="${H-p}" stroke="#CDD2E3"/>
+    <polyline points="${R1_CURVE.map(([a,b])=>`${x(a).toFixed(1)},${y(b).toFixed(1)}`).join(" ")}" fill="none" stroke="#4C3BFF" stroke-width="3" stroke-linejoin="round"/>
+    <circle cx="${x(w)}" cy="${y(sc/100)}" r="8" fill="#FF9F1C" stroke="#fff" stroke-width="2"/>
+    ${[0,3,6,9,12,15].map(v=>`<text x="${x(v)}" y="${H-p+18}" font-size="11" fill="#5A6178" text-anchor="middle">${v}</text>`).join("")}
+    <text x="${(W+p)/2}" y="${H-4}" font-size="12" fill="#5A6178" text-anchor="middle">${t.xLabel}</text>
+    <text x="12" y="${H/2}" font-size="12" fill="#5A6178" text-anchor="middle" transform="rotate(-90 12 ${H/2})">${t.yLabel}</text></svg>`; }
+function r1Result(){ render=r1Result; const t=L(), s=S().r1, w=r1Weeks(s), k=r1Known(s.asked), fr=R1_FRAMES.find(f=>f.id===s.frame), opt=R1_CURVE.reduce((a,b)=>b[1]>a[1]?b:a);
+  let m,c; if(fr.q>=1&&w<=opt[0]+1.5){m=t.r1_good;c="good";} else if(fr.q>=1){m=t.r1_late;c="warn";} else if(fr.q>=0.55){m=w>opt[0]+3?t.r1_late:t.r1_okay;c="warn";} else {m=w>opt[0]+3?t.r1_late:t.r1_early;c="bad";}
+  view(`<section class="card hero"><span class="pill">${t.r1Pill}</span><h1>${t.r1H}</h1><p style="margin:0">“${esc(fr.t[lang])}”</p></section>
+    <div class="score"><div><b>${Math.round(fr.q*100)} %</b><span>${t.resQuality}</span></div><div><b>${Math.round(r1Impact(w)*100)} %</b><span>${t.resImpact} (${num(w)} ${lang==="de"?"Wochen":"weeks"})</span></div><div><b style="color:#4C3BFF">${s.score}</b><span>${t.resScore}</span></div></div>
+    <div class="msg ${c}">${m}</div><div class="lesson">${t.r1Lesson}</div>
+    <section class="card"><h2>${t.curveH}</h2><p class="small muted">${t.curveP}</p>${r1Curve(w,s.score)}</section>
+    <section class="card"><h2>${t.factsH}</h2><ul class="facts">${Object.keys(R1_FACTS).map(f=>`<li class="${k.has(f)?"got":"miss"}"><b>${k.has(f)?t.got:t.miss}:</b> ${esc(R1_FACTS[f][lang])}</li>`).join("")}</ul></section>
+    <div class="actions"><button class="ghost" id="nx">${t.again}</button></div><p class="small muted">${t.webNote}</p>`,()=>{
+      document.getElementById("nx").onclick=()=>{ S().r1={asked:[],done:false}; r1Intro(); }; }); }
+
+/* ================================================================ ROUND 2 */
+const r2All=()=>R2_UP.concat(R2_SIDE);
+const r2Value=f=>f.imp*f.act;
+function r2Intro(){ render=r2Intro; const t=L(); introCard(t.r2H,t.r2Pill,t.r2Intro,null,()=>{ S().r2.seen=true; save(); r2Play(); }); }
+function r2Play(){ render=r2Play; const t=L(), s=S().r2;
+  const rungs=R2_UP.slice().reverse().map((u,ri)=>{ const i=R2_UP.length-1-ri, shown=i<=s.up;
+    return `<div class="rung${shown?"":" hidden"}${i===s.up?" cur":""}"><span class="lv">${i}</span><div class="fr">${shown?esc(u.t[lang]):t.hiddenRung}</div></div>`; }).join("");
+  const sides=s.side.map(id=>{ const f=R2_SIDE.find(x=>x.id===id); return `<div class="rung side"><span class="lv">↘</span><div class="fr">${esc(f.t[lang])}<br><small class="muted">${f.icon} ${esc(f.ans[lang])}</small></div></div>`; }).join("");
+  const canWhy=s.up<R2_UP.length-1;
+  view(`<h2>${t.ladderH}</h2>
+    <div class="ladder">${rungs}${sides}</div>
+    <div class="actions">${canWhy?`<button id="why">${t.askWhy}${esc(R2_UP[s.up].why[lang])}</button>`:""}</div>
+    ${s.up>=1&&R2_UP[s.up-1]?`<p class="small muted" style="margin-top:.6rem">${esc(R2_UP[s.up-1].ans[lang])}</p>`:""}
+    <section class="card"><h2>${t.stopH}</h2><p class="small muted">${s.up>=1?t.stopP:t.stopLocked}</p>
+      ${R2_SIDE.map(f=>{ const done=s.side.includes(f.id); return `<button class="q${done?" done":""}" data-id="${f.id}" ${done||s.up<1?"disabled":""}><span>${f.icon} ${esc(f.who[lang])}</span><span class="cost">${done?"✓":t.invCost}</span></button>`; }).join("")}</section>
+    <div class="actions"><button id="dec">${t.decide}</button></div>`,()=>{
+    const w=document.getElementById("why"); if(w) w.onclick=()=>{ s.up++; rec(`r2_why_${s.up}`,"fill-in",R2_UP[s.up].id,"Round 2 asked why, revealed level "+s.up); save(); r2Play(); };
+    app.querySelectorAll(".q:not([disabled])").forEach(b=>b.onclick=()=>{ s.side.push(b.dataset.id); s.inv++; rec(`r2_inv_${s.inv}`,"fill-in",b.dataset.id,"Round 2 investigation"); save(); r2Play(); });
+    document.getElementById("dec").onclick=r2Frame; }); }
+function r2Frame(){ render=r2Frame; const t=L(), s=S().r2; let pick=null;
+  const avail=R2_UP.slice(0,s.up+1).concat(R2_SIDE.filter(f=>s.side.includes(f.id)));
+  view(`<h1>${t.r2Frame}</h1>${avail.map(f=>`<label class="opt"><input type="radio" name="f" value="${f.id}"><span>${esc(f.t[lang])}</span></label>`).join("")}
+    <div class="actions"><button id="ok" disabled>${t.choose}</button><button class="ghost" id="back">${t.back}</button></div>`,()=>{
+    radios("input[name=f]",v=>{ pick=v; document.getElementById("ok").disabled=false; });
+    document.getElementById("back").onclick=()=>r2Play();
+    document.getElementById("ok").onclick=()=>{ const f=r2All().find(x=>x.id===pick); s.frame=pick;
+      s.score=Math.min(100,Math.round(r2Value(f)/R2.best*(1-R2.invCost*s.inv)*100)); s.done=true;
+      rec("r2_frame","fill-in",pick,"Round 2 chosen frame"); rec("r2_levels","numeric",s.up,"Round 2 highest level revealed"); rec("r2_investigations","numeric",s.inv,"Round 2 investigations"); rec("r2_score","numeric",s.score,"Round 2 result (0-100)");
+      save(); r2Result(); }; }); }
+function r2Plot(chosen,s){ const t=L(),W=560,H=310,p=48,x=v=>p+v*(W-p-20),y=v=>H-p-v*(H-p-34);
+  const shown=new Set(R2_UP.slice(0,s.up+1).map(f=>f.id).concat(s.side));
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${t.r2resH}">
+    <rect x="${x(.6)}" y="${y(1)}" width="${x(1)-x(.6)}" height="${y(.6)-y(1)}" fill="#DDF5EC"/>
+    <line x1="${p}" y1="${H-p}" x2="${W-20}" y2="${H-p}" stroke="#CDD2E3"/><line x1="${p}" y1="20" x2="${p}" y2="${H-p}" stroke="#CDD2E3"/>
+    ${r2All().map(f=>{ const me=f.id===chosen, sh=shown.has(f.id);
+      return `<circle cx="${x(f.act)}" cy="${y(f.imp)}" r="${me?11:7}" fill="${me?"#FF9F1C":sh?"#4C3BFF":"#CDD2E3"}" stroke="#fff" stroke-width="2"><title>${esc(f.t[lang])}</title></circle>`; }).join("")}
+    ${[["#FF9F1C",0],["#4C3BFF",1],["#CDD2E3",2]].map(([col,i])=>`<circle cx="${p+10+i*160}" cy="12" r="6" fill="${col}"/><text x="${p+20+i*160}" y="16" font-size="11" fill="#5A6178">${t.legend[i]}</text>`).join("")}
+    <text x="${(W+p)/2}" y="${H-12}" font-size="12" fill="#5A6178" text-anchor="middle">${t.action} →</text>
+    <text x="14" y="${H/2}" font-size="12" fill="#5A6178" text-anchor="middle" transform="rotate(-90 14 ${H/2})">${t.impact} →</text></svg>`; }
+function r2Result(){ render=r2Result; const t=L(), s=S().r2, f=r2All().find(x=>x.id===s.frame);
+  const m = f.id==="u0"?[t.r2_narrow,"bad"]: (f.id==="u2"||f.id==="u3")?[t.r2_broad,"bad"]: f.id==="u1"?[t.r2_mid,"warn"]: f.id==="s1"?[t.r2_best,"good"]:[t.r2_side,"warn"];
+  view(`<section class="card hero"><span class="pill">${t.r2Pill}</span><h1>${t.r2H}</h1><p style="margin:0">“${esc(f.t[lang])}”</p></section>
+    <div class="score"><div><b>${Math.round(f.imp*100)} %</b><span>${t.impact}</span></div><div><b>${Math.round(f.act*100)} %</b><span>${t.action}</span></div><div><b style="color:#4C3BFF">${s.score}</b><span>${t.resScore}</span></div></div>
+    <div class="msg ${m[1]}">${m[0]}</div><div class="lesson">${t.r2Lesson}</div>
+    <section class="card"><h2>${t.r2resH}</h2><p class="small muted">${t.r2resP}</p>${r2Plot(f.id,s)}
+      <ul class="facts">${r2All().slice().sort((a,b)=>r2Value(b)-r2Value(a)).map(x=>`<li class="${x.id===f.id?"got":"miss"}">${esc(x.t[lang])}</li>`).join("")}</ul></section>
+    <div class="actions"><button id="nx">${t.next}</button></div>`,()=>{ document.getElementById("nx").onclick=next; }); }
+
+/* ================================================================ ROUND 3 */
+const r3Item=id=>R3_AI.concat(R3_FIELD).find(x=>x.id===id);
+const r3Days=s=>s.used.reduce((a,id)=>a+r3Item(id).cost,0);
+function r3Hyp(s){ const h=new Set(["recipes"]); s.used.forEach(id=>{ const it=r3Item(id); (it.unlock||[]).forEach(x=>h.add(x)); (it.ev||[]).forEach(x=>h.add(x)); }); return h; }
+function r3Ev(s){ const e=new Set(); s.used.forEach(id=>(r3Item(id).ev||[]).forEach(x=>e.add(x))); return e; }
+function r3Intro(){ render=r3Intro; const t=L(); introCard(t.r3H,t.r3Pill,t.r3Intro,null,()=>{ S().r3.seen=true; save(); r3Play(); }); }
+function r3Play(isNew){ render=r3Play; const t=L(), s=S().r3, d=r3Days(s), left=R3.budget-d, hinted=s.used.includes("a3");
+  const btn=(it,cls)=>{ const done=s.used.includes(it.id), afford=it.cost<=left+1e-9;
+    return `<button class="q ${cls}${done?" done":""}" data-id="${it.id}" ${done||!afford?"disabled":""}><span>${it.icon?it.icon+" ":""}${esc(it.ask[lang])}${hinted&&(it.id==="f2"||it.id==="f3")&&!done?`<span class="tag ai">${t.aiSuggests}</span>`:""}</span><span class="cost">${done?"✓":afford?t.dayc(it.cost):t.noTime}</span></button>`; };
+  view(`<div class="dash"><div class="meter"><span>${t.daysUsed}</span><b>${num(d)} / ${R3.budget}</b><div class="bar"><i style="width:${d/R3.budget*100}%"></i></div></div>
+      <div class="meter"><span>${t.daysLeft}</span><b>${num(left)}</b><div class="bar"><i style="width:${left/R3.budget*100}%"></i></div></div><button id="frame">${t.frameNow}</button></div>
+    <div class="grid"><div class="sh"><div class="who"><span class="av">🤖</span><div><b>${t.aiH}</b></div></div>${R3_AI.map(it=>btn(it,"aiq")).join("")}</div>
+      <div class="sh"><div class="who"><span class="av">🔍</span><div><b>${t.fieldH}</b></div></div>${R3_FIELD.map(it=>btn(it,"")).join("")}</div></div>
+    <h2 style="margin-top:1.2rem">${t.notesH}</h2>${s.used.length?`<ul class="notes">${s.used.slice().reverse().map((id,i)=>{ const it=r3Item(id), ai=id[0]==="a";
+      return `<li class="${ai?"ai":""}${isNew&&i===0?" new":""}"><small>${ai?"🤖 "+t.aiH:it.icon+" "+esc(it.ask[lang])}</small>${ai?`<i>${esc(it.ask[lang])}</i><br>`:""}${esc(it.ans[lang])}</li>`; }).join("")}</ul>`:`<p class="muted">${t.noNotes.replace(/Choose a stakeholder and ask a question\.|Wähle eine Person und stelle eine Frage\./,"")}</p>`}`,()=>{
+    app.querySelectorAll(".q:not([disabled])").forEach(b=>b.onclick=()=>{ s.used.push(b.dataset.id); rec(`r3_use_${String(s.used.length).padStart(2,"0")}`,"fill-in",b.dataset.id,`Round 3 ${b.dataset.id[0]==="a"?"AI prompt":"field research"}; days so far ${r3Days(s)}`); save(); r3Play(true); });
+    document.getElementById("frame").onclick=r3Frame; }); }
+function r3Frame(){ render=r3Frame; const t=L(), s=S().r3, h=r3Hyp(s), e=r3Ev(s); let pick=null, conf=50;
+  view(`<h1>${t.frameH}</h1>${R3_FRAMES.map(f=>{ const ok=h.has(f.id);
+      return `<label class="opt${ok?"":" locked"}"><input type="radio" name="f" value="${f.id}" ${ok?"":"disabled"}><span>${esc(f.t[lang])}${ok?(e.has(f.id)?`<span class="tag ev">${t.evid}</span>`:(f.base?"":`<span class="tag ai">${t.hyp}</span>`)):`<br><small class="muted">${t.lockedHint}</small>`}</span></label>`; }).join("")}
+    <section class="card"><p style="font-weight:650;margin:0 0 .4rem">${t.conf}</p><input type="range" id="conf" min="0" max="100" step="10" value="50">
+      <div style="display:flex;justify-content:space-between" class="small muted"><span>${t.confL}</span><b id="cv">50 %</b><span>${t.confH}</span></div></section>
+    <div class="actions"><button id="ok" disabled>${t.choose}</button><button class="ghost" id="back">${t.back}</button></div>`,()=>{
+    radios("input[name=f]",v=>{ pick=v; document.getElementById("ok").disabled=false; });
+    document.getElementById("conf").oninput=ev=>{ conf=+ev.target.value; document.getElementById("cv").textContent=conf+" %"; };
+    document.getElementById("back").onclick=()=>r3Play();
+    document.getElementById("ok").onclick=()=>{ const f=R3_FRAMES.find(x=>x.id===pick), evf=e.has(pick)?1:R3.noEvidence;
+      s.frame=pick; s.conf=conf; s.evidence=e.has(pick); s.score=Math.round(f.q*evf*100); s.done=true;
+      rec("r3_frame","fill-in",pick,"Round 3 chosen frame"); rec("r3_evidence","true-false",s.evidence?"true":"false","Round 3 frame backed by field evidence");
+      rec("r3_confidence","numeric",conf,"Round 3 confidence (0-100)"); rec("r3_days","numeric",r3Days(s),"Round 3 days used");
+      rec("r3_ai_prompts","numeric",s.used.filter(x=>x[0]==="a").length,"Round 3 AI prompts used"); rec("r3_score","numeric",s.score,"Round 3 result (0-100)");
+      save(); r3Result(); }; }); }
+function r3Result(){ render=r3Result; const t=L(), s=S().r3, f=R3_FRAMES.find(x=>x.id===s.frame);
+  const m = s.frame==="portions"&&s.evidence?[t.r3_good,"good"]: s.frame==="portions"?[t.r3_noev,"warn"]: s.conf>=60?[t.r3_conf,"bad"]:[t.r3_wrong,"bad"];
+  const bars=(lab,v,col)=>`<div style="margin:.6rem 0"><div class="small" style="font-weight:650">${lab}: ${v} %</div><div class="bar" style="height:14px"><i style="width:${v}%;background:${col}"></i></div></div>`;
+  view(`<section class="card hero"><span class="pill">${t.r3Pill}</span><h1>${t.r3H}</h1><p style="margin:0">“${esc(f.t[lang])}”</p></section>
+    <div class="score"><div><b>${Math.round(f.q*100)} %</b><span>${t.resQuality}</span></div><div><b>${s.evidence?"✓":"✗"}</b><span>${t.evid}</span></div><div><b style="color:#4C3BFF">${s.score}</b><span>${t.resScore}</span></div></div>
+    <div class="msg ${m[1]}">${m[0]}${s.used.includes("a4")?`<br><span style="font-weight:500">${t.r3_syc}</span>`:""}</div><div class="lesson">${t.r3Lesson}</div>
+    <section class="card"><h2>${t.r3resH}</h2>${bars(t.r3Conv,s.conf,"#8A4DFF")}${bars(t.r3Corr,s.score,"#0FA678")}</section>
+    <div class="actions"><button id="nx">${t.toSummary}</button></div>`,()=>{ document.getElementById("nx").onclick=next; }); }
+
+/* ================================================================ SUMMARY */
+function summary(){ render=summary; const t=L(), s=S(); const sc=[s.r1.score,s.r2.score,s.r3.score], avg=Math.round(sc.reduce((a,b)=>a+b,0)/3);
+  if(!practice&&!st.reported){ st.reported=true; SCORM.set("cmi.score.raw",avg); SCORM.set("cmi.score.min",0); SCORM.set("cmi.score.max",100); SCORM.set("cmi.score.scaled",(avg/100).toFixed(2)); rec("total_score","numeric",avg,"Average of the three rounds"); save(); }
+  view(`<section class="card hero"><h1>${t.sumH}</h1><p style="margin:0">${t.sumP}</p></section>
+    <div class="score">${[t.r1H,t.r2H,t.r3H].map((h,i)=>`<div><b style="color:#4C3BFF">${sc[i]}</b><span>${esc(h)}</span></div>`).join("")}</div>
+    <div class="lesson">${t.r1Lesson}</div><div class="lesson">${t.r2Lesson}</div><div class="lesson">${t.r3Lesson}</div>
+    <p class="muted">${t.avg}: <b>${avg}</b></p>
+    <div class="actions"><button class="ghost" id="again">${t.again}</button></div><p class="small muted">${t.src}</p>`,()=>{
+    document.getElementById("again").onclick=()=>{ practice=true; P=fresh(); r1Intro(); }; }); }
+
+/* ================================================================ LECTURER */
+function lecturer(){ render=lecturer; const t=L(), opt=R1_CURVE.reduce((a,b)=>b[1]>a[1]?b:a);
+  view(`<h1>${t.lecH}</h1>
+  <section class="card"><h2>${t.r1H}</h2><p>Result = frame quality × max(${R1.minImpact}, 1 − ${R1.decay} × weeks). Best: <b>${Math.round(opt[1]*100)}</b> at ${opt[0]} weeks (data analyst and maintenance crew, quick question plus follow-up each).</p>${r1Curve(opt[0],Math.round(opt[1]*100))}
+    <table><tr><th>Frame</th><th>Quality</th><th>Unlocked by</th></tr>${R1_FRAMES.map(f=>`<tr><td>${esc(f.t[lang])}</td><td>${f.q}</td><td>${f.need.length?f.need.map(x=>x.join(" + ")).join(" or "):"always"}</td></tr>`).join("")}</table></section>
+  <section class="card"><h2>${t.r2H}</h2><p>Result = impact × actionability ÷ ${R2.best} × (1 − ${R2.invCost} × investigations). Best: ask “Why?” once, ask patients, choose “effortless cancelling or rescheduling”.</p>
+    <table><tr><th>Frame</th><th>Impact</th><th>Actionability</th><th>Product</th></tr>${r2All().map(f=>`<tr><td>${esc(f.t[lang])}</td><td>${f.imp}</td><td>${f.act}</td><td>${(f.imp*f.act).toFixed(2)}</td></tr>`).join("")}</table></section>
+  <section class="card"><h2>${t.r3H}</h2><p>Result = frame quality × evidence (1 with field evidence, ${R3.noEvidence} without). Budget ${R3.budget} days; AI prompts ½ day, field research 1–3 days. Best: one AI prompt for hypotheses, then interviews or the household data.</p>
+    <table><tr><th>Option</th><th>Days</th><th>Effect</th></tr>${R3_AI.concat(R3_FIELD).map(i=>`<tr><td>${esc(i.ask[lang])}</td><td>${i.cost}</td><td>${(i.unlock||[]).length?"hypotheses: "+i.unlock.join(", "):(i.ev||[]).length?"evidence: "+i.ev.join(", "):i.sycophant?"agrees with the founder (sycophancy)":i.hint?"points to field research":"–"}</td></tr>`).join("")}</table></section>`); }
+
+/* ================================================================ START */
+if(false) lecturer();
+else if(!st.started) { st.started=true; r1Intro(); }
+else route();
+</script>
+</body>
+</html>
